@@ -1,7 +1,9 @@
 # My Reddit Companion
 
 My reddit companion is an extension that integrates reddit into the browser.  
-The Firefox Add-on can be [found here](https://addons.mozilla.org/en-US/firefox/addon/my-reddit-companion).
+
+The Firefox Add-on can be [found here](https://addons.mozilla.org/en-US/firefox/addon/my-reddit-companion).  
+The Chrome Plugin can be [found here](https://chrome.google.com/webstore/detail/my-reddit-companion/ghkmgdhpbkijdnnhodlejkbpehnkoglf).
 
 ## Features
 

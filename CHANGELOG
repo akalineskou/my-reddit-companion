@@ -1,2 +1,5 @@
+== Version 3.0.3 ==
+* Fix Chrome compatibility issues
+
 == Version 3.0.0 ==
 * Initial commit (major code refactor)

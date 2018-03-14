@@ -1,6 +1,6 @@
-/* global browser, Utils */
+/* global Utils */
 
-var port = browser.runtime.connect({
+var port = Utils.getBrowserOrChromeVar().runtime.connect({
     name: window.location.hash.substr(1)
 });
 

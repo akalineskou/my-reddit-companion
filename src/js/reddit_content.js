@@ -1,4 +1,4 @@
-/* global browser */
+/* global Utils */
 
 var Reddit = {
     init: function () {
@@ -36,7 +36,7 @@ var Reddit = {
         if (data) {
             console.log('Info: Sending message backgroundThingData with data', data);
 
-            browser.runtime.sendMessage({
+            Utils.getBrowserOrChromeVar().runtime.sendMessage({
                 action: 'backgroundThingData',
                 data: data
             });
@@ -78,7 +78,7 @@ var Reddit = {
                 if (response.data) {
                     console.log('Info: Setting logged in hash', response.data.modhash);
 
-                    browser.storage.local.set({logged_in_hash: response.data.modhash});
+                    Utils.getBrowserOrChromeVar().storage.local.set({logged_in_hash: response.data.modhash});
                 }
             }
         });

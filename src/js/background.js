@@ -1,14 +1,21 @@
-/* global browser, Utils */
+/* global Utils */
 
 var Background = {
     getLoggedInHash: function (callback) {
-        var gettingItem = browser.storage.local.get('logged_in_hash');
-
-        gettingItem.then(function (storage_item) {
+        var logged_in_hash_promise = function (storage_item) {
             if (typeof callback === 'function') {
                 callback(storage_item.logged_in_hash);
             }
-        });
+        };
+
+        var logged_in_hash = 'logged_in_hash';
+
+        if (Utils.getBrowserOrChrome() === 'browser') {
+            Utils.getBrowserOrChromeVar().storage.local.get(logged_in_hash).then(logged_in_hash_promise);
+        } else {
+            Utils.getBrowserOrChromeVar().storage.local.get(logged_in_hash, logged_in_hash_promise);
+        }
+
     },
     isLoggedIn: function (logged_in_hash) {
         console.log('Info: Logged in hash', logged_in_hash);
@@ -119,15 +126,15 @@ var BarTab = {
     }
 };
 
-browser.runtime.onMessage.addListener(function (request) {
+Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request) {
     console.log('Info: Incoming background message request', request);
 
     if (request.action === 'backgroundThingData') {
-        RedditTab.setUrlData(request.data.url, request.data);
+        RedditTab.setUrlData(Utils.normalizeUrl(request.data.url), request.data);
     }
 });
 
-browser.runtime.onConnect.addListener(function (port) {
+Utils.getBrowserOrChromeVar().runtime.onConnect.addListener(function (port) {
     console.log('Info: Incoming background connect port', port);
 
     var tab;
@@ -137,8 +144,7 @@ browser.runtime.onConnect.addListener(function (port) {
     if (port.name === 'page_overlay') {
         // set a small timeout for the tab url to change from about:blank
         window.setTimeout(function () {
-            // query all tabs until you find the one with the same id as the sender
-            browser.tabs.query({currentWindow: true}).then(function (tabs) {
+            var tabs_query_promise = function (tabs) {
                 for (var tab_index in tabs) {
                     if (tab_id === tabs[tab_index].id) {
                         tab = tabs[tab_index];
@@ -146,7 +152,7 @@ browser.runtime.onConnect.addListener(function (port) {
                 }
 
                 if (typeof tab !== 'undefined') {
-                    var data = RedditTab.getUrlData(tab.url);
+                    var data = RedditTab.getUrlData(Utils.normalizeUrl(tab.url));
                     if (data) {
                         OverlayTab.setOverlayTab(tab_id, port);
 
@@ -163,9 +169,22 @@ browser.runtime.onConnect.addListener(function (port) {
                         } else {
                             console.log('Info: Ignoring bar on this page because it was closed', data);
                         }
+                    } else {
+                        console.log('Error: Data could not be found for tab url', tab.url);
                     }
+                } else {
+                    console.log('Error: Tab could not be found with id', tab_id);
                 }
-            });
+            };
+
+            // query all tabs until you find the one with the same id as the sender
+            var query = {currentWindow: true};
+
+            if (Utils.getBrowserOrChrome() === 'browser') {
+                Utils.getBrowserOrChromeVar().tabs.query(query).then(tabs_query_promise);
+            } else {
+                Utils.getBrowserOrChromeVar().tabs.query(query, tabs_query_promise);
+            }
         }, 10);
     } else {
         OverlayTab.setOverlayTab(tab_id, port);
@@ -190,4 +209,4 @@ browser.runtime.onConnect.addListener(function (port) {
     }
 });
 
-console.log('Info: Background running');
+console.log('Info: Background running', Utils.getBrowserOrChrome());

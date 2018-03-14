@@ -1,6 +1,6 @@
 {
     "name": "My Reddit Companion",
-    "version": "3.0.2",
+    "version": "3.0.3",
     "manifest_version": 2,
     "description": "Best reddit companion on the web",
     "homepage_url": "https://github.com/alex2005git/my-reddit-companion",
@@ -10,9 +10,9 @@
         "<all_urls>"
     ],
     "icons": {
-		"16": "images/reddit-16.png",
+        "16": "images/reddit-16.png",
         "48": "images/reddit-48.png",
-		"96": "images/reddit-96.png",
+        "96": "images/reddit-96.png",
         "128": "images/reddit-128.png"
     },
     "background": {

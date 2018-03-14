@@ -1,4 +1,4 @@
-/* global browser */
+/* global Utils */
 
 var IframeBar = {
     iframe_id: 'reddit_bar',
@@ -8,7 +8,7 @@ var IframeBar = {
 
         $('head').append($('<link>', {
             id: IframeBar.stylesheet_id,
-            href: browser.extension.getURL('css/page_overlay.css'),
+            href: Utils.getBrowserOrChromeVar().extension.getURL('css/page_overlay.css'),
             type: 'text/css',
             rel: 'stylesheet'
         }));
@@ -17,7 +17,7 @@ var IframeBar = {
             id: IframeBar.iframe_id,
             scrolling: 'no',
             frameborder: 'no',
-            src: browser.extension.getURL('html/bar.html#' + encodeURIComponent(slug))
+            src: Utils.getBrowserOrChromeVar().extension.getURL('html/bar.html#' + encodeURIComponent(slug))
         }));
     },
     removeBar: function () {
@@ -26,7 +26,7 @@ var IframeBar = {
     }
 };
 
-var port = browser.runtime.connect({
+var port = Utils.getBrowserOrChromeVar().runtime.connect({
     name: 'page_overlay'
 });
 
@@ -51,7 +51,7 @@ $(window).ready(function () {
         event = event.originalEvent;
         console.log('Info: Message received from bar iframe', event);
 
-        if (event.origin === browser.extension.getURL('').slice(0, -1)) {
+        if (event.origin === Utils.getBrowserOrChromeVar().extension.getURL('').slice(0, -1)) {
             try {
                 var request = JSON.parse(event.data);
                 console.log('Info: With request', request);
