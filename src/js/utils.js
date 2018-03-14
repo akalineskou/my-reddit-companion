@@ -17,6 +17,6 @@ var Utils = {
         return Utils.getBrowserOrChrome() === 'browser' ? browser : chrome;
     },
     normalizeUrl: function (url) {
-        return url.replace(/^https?/i, '');
+        return url.replace(/^https\:\/\/?/i, '');
     }
 };

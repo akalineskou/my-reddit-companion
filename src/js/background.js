@@ -153,6 +153,10 @@ Utils.getBrowserOrChromeVar().runtime.onConnect.addListener(function (port) {
 
                 if (typeof tab !== 'undefined') {
                     var data = RedditTab.getUrlData(Utils.normalizeUrl(tab.url));
+                    if (!data) {
+                        data = RedditTab.getUrlData(Utils.normalizeUrl(tab.title));
+                    }
+
                     if (data) {
                         OverlayTab.setOverlayTab(tab_id, port);
 
