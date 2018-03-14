@@ -1,3 +1,6 @@
+== Version 3.0.5 ==
+* Change how content scripts talk with background script
+
 == Version 3.0.4 ==
 * Find data by tab title if data was not found by url
 

@@ -1,52 +1,38 @@
 /* global Utils */
 
-var port = Utils.getBrowserOrChromeVar().runtime.connect({
-    name: window.location.hash.substr(1)
-});
+Utils.myRuntimeSendMessage({
+    action: 'bar_init',
+    slug: window.location.hash.substr(1) || ''
+}, function (response) {
+    if (!Utils.varIsUndefined(response)) {
+        console.log("Info: 'bar_init' response", response);
 
-port.onMessage.addListener(function (request) {
-    console.log('Info: Incoming bar message request', request);
-
-    switch (request.action) {
-        case 'overlayRedditBarData':
-            Bar.init(request.data, request.logged_in);
-            break
+        Bar.init(response.data, response.logged_in);
     }
 });
 
 var Bar = {
-    initiated: false,
     data: null,
     logged_in: false,
     init: function (data, logged_in) {
-        if (Bar.initiated || data._fake) {
-            return;
-        }
-
         Bar.data = data;
         Bar.logged_in = logged_in;
 
         $('#upvote').click(function () {
             Bar.actionUpvote();
         });
-
         $('#downvote').click(function () {
             Bar.actionDownvote();
         });
-
         $('#save').click(function () {
             Bar.actionSave();
         });
-
         $('#login').click(function () {
-            window.open('https://www.reddit.com/login');
+            Bar.actionLogin();
         });
-
         $('#close').click(function () {
             Bar.actionClose();
         });
-
-        Bar.initiated = true;
 
         Bar.setBarData();
     },
@@ -60,7 +46,7 @@ var Bar = {
         }
 
         if (Bar.data.permalink) {
-            $('#title').attr('href', 'https://www.reddit.com' + Bar.data.permalink);
+            $('#title').attr('href', `https://www.reddit.com${Bar.data.permalink}`);
         }
 
         if (Bar.data.likes === true) {
@@ -80,14 +66,13 @@ var Bar = {
         $('#score').text(Bar.data.score);
 
         if (Bar.data.subreddit) {
-            $('#subreddit')
-                    .text(Bar.data.subreddit)
-                    .attr('href', 'https://www.reddit.com/' + Bar.data.subreddit);
+            $('#subreddit').text(Bar.data.subreddit);
+            $('#subreddit').attr('href', `https://www.reddit.com/${Bar.data.subreddit}`);
         } else {
             $('#bar').removeClass('subreddit');
         }
 
-        $('#comments').attr('href', 'https://www.reddit.com' + Bar.data.permalink);
+        $('#comments').attr('href', `https://www.reddit.com${Bar.data.permalink}`);
         $('#comments span').text(Bar.data.num_comments);
     },
     actionUpvote: function (post_message = true) {
@@ -137,18 +122,20 @@ var Bar = {
         Bar.actionPostMessage(action);
         Bar.setBarData();
     },
+    actionLogin: function () {
+        window.open('https://www.reddit.com/login');
+    },
     actionClose: function () {
-        var request = Bar.actionPostMessage('bar_close');
-        Utils.postMessageToTopWindow(request);
+        Bar.actionPostMessage('bar_close');
+        Utils.postMessageToTopWindow({
+            action: 'bar_close'
+        });
     },
     actionPostMessage: function (action) {
-        var request = {
-            action: action,
+        Utils.myRuntimeSendMessage({
+            action: 'bar_action',
+            subaction: action,
             data: Bar.data
-        };
-
-        port.postMessage(request);
-
-        return request;
+        });
     }
 };

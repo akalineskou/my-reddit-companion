@@ -1,30 +1,10 @@
 /* global Utils */
 
-var Background = {
-    getLoggedInHash: function (callback) {
-        var logged_in_hash_promise = function (storage_item) {
-            if (typeof callback === 'function') {
-                callback(storage_item.logged_in_hash);
-            }
-        };
-
-        var logged_in_hash = 'logged_in_hash';
-
-        if (Utils.getBrowserOrChrome() === 'browser') {
-            Utils.getBrowserOrChromeVar().storage.local.get(logged_in_hash).then(logged_in_hash_promise);
-        } else {
-            Utils.getBrowserOrChromeVar().storage.local.get(logged_in_hash, logged_in_hash_promise);
-        }
-
-    },
-    isLoggedIn: function (logged_in_hash) {
-        console.log('Info: Logged in hash', logged_in_hash);
-
-        return typeof logged_in_hash !== 'undefined' && logged_in_hash !== '';
-    }
-};
-
 var RedditTab = {
+    logged_in_hash: '',
+    isLoggedIn: function () {
+        return !Utils.varIsUndefined(RedditTab.logged_in_hash) && RedditTab.logged_in_hash !== '';
+    },
     urls_data: {},
     slugs_data: {},
     setUrlData: function (url, data) {
@@ -41,37 +21,8 @@ var RedditTab = {
     }
 };
 
-var OverlayTab = {
-    tabs_data: {},
-    setOverlayTab: function (tab_id, port) {
-        if (typeof OverlayTab.tabs_data[tab_id] === 'undefined') {
-            console.log('Info: Overlay tab_id ' + tab_id + ' added with port', port);
-
-            OverlayTab.tabs_data[tab_id] = port;
-            port.onDisconnect.addListener(function () {
-                OverlayTab.removeOverlayTab(tab_id);
-            });
-        }
-    },
-    getOverlayTab: function (tab_id) {
-        return OverlayTab.tabs_data[tab_id];
-    },
-    removeOverlayTab: function (tab_id) {
-        console.log('Info: Overlay tab removed', tab_id);
-
-        delete OverlayTab.tabs_data[tab_id];
-    }
-};
-
 var BarTab = {
     bars_closed: {},
-    addBarPort: function (port) {
-        port.onMessage.addListener(function (request) {
-            console.log('Info: Incoming bar message request', request);
-
-            BarTab.handleBarAction(request.action, request.data);
-        });
-    },
     handleBarAction: function (request_action, request_data) {
         var action;
         var data = {
@@ -106,111 +57,72 @@ var BarTab = {
         return BarTab.bars_closed[slug];
     },
     reditApiCall: function (action, data) {
-        Background.getLoggedInHash(function (logged_in_hash) {
-            if (Background.isLoggedIn(logged_in_hash)) {
-                data.uh = logged_in_hash;
-                data.app = 'reddit_bar';
+        if (RedditTab.isLoggedIn()) {
+            data.uh = RedditTab.logged_in_hash;
+            data.app = 'my_reddit_companion';
 
-                console.log('Info: Sending API action ' + action + ' with data', data);
+            console.log(`Info: Sending API action '${action}' with data`, data);
 
-                $.ajax({
-                    type: 'POST',
-                    url: 'https://www.reddit.com/api/' + action,
-                    data: data,
-                    success: function (response) {
-                        console.log('response', response);
-                    }
-                });
-            }
-        });
+            $.ajax({
+                type: 'POST',
+                url: `https://www.reddit.com/api/${action}`,
+                data: data,
+                success: function (response) {
+                }
+            });
+        }
     }
 };
 
-Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request) {
-    console.log('Info: Incoming background message request', request);
+Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    console.log('Info: Incoming background request', request, 'sender', sender);
 
-    if (request.action === 'backgroundThingData') {
-        RedditTab.setUrlData(Utils.normalizeUrl(request.data.url), request.data);
-    }
-});
+    switch (request.action) {
+        case 'reddit_content_logged_in_hash':
+            RedditTab.logged_in_hash = request.logged_in_hash;
+            break;
 
-Utils.getBrowserOrChromeVar().runtime.onConnect.addListener(function (port) {
-    console.log('Info: Incoming background connect port', port);
+        case 'reddit_content_data':
+            RedditTab.setUrlData(Utils.normalizeUrl(request.data.url), request.data);
+            break;
 
-    var tab;
-    var tab_id = Utils.getTabIdFromPort(port);
-    console.log('Info: tab_id', tab_id);
+        case 'page_overlay_init':
+            var tab = sender.tab;
 
-    if (port.name === 'page_overlay') {
-        // set a small timeout for the tab url to change from about:blank
-        window.setTimeout(function () {
-            var tabs_query_promise = function (tabs) {
-                for (var tab_index in tabs) {
-                    if (tab_id === tabs[tab_index].id) {
-                        tab = tabs[tab_index];
-                    }
-                }
-
-                if (typeof tab !== 'undefined') {
-                    var data = RedditTab.getUrlData(Utils.normalizeUrl(tab.url));
-                    if (!data) {
-                        data = RedditTab.getUrlData(Utils.normalizeUrl(tab.title));
-                    }
-
-                    if (data) {
-                        OverlayTab.setOverlayTab(tab_id, port);
-
-                        if (!BarTab.getBarClosed(data.slug)) {
-                            var tab_data = OverlayTab.getOverlayTab(tab.id);
-                            if (tab_data) {
-                                console.log('Info: Sending action overlayRedditBar with data', data);
-
-                                tab_data.postMessage({
-                                    action: 'overlayRedditBar',
-                                    data: data
-                                });
-                            }
-                        } else {
-                            console.log('Info: Ignoring bar on this page because it was closed', data);
-                        }
-                    } else {
-                        console.log('Error: Data could not be found for tab url', tab.url);
-                    }
-                } else {
-                    console.log('Error: Tab could not be found with id', tab_id);
-                }
-            };
-
-            // query all tabs until you find the one with the same id as the sender
-            var query = {currentWindow: true};
-
-            if (Utils.getBrowserOrChrome() === 'browser') {
-                Utils.getBrowserOrChromeVar().tabs.query(query).then(tabs_query_promise);
-            } else {
-                Utils.getBrowserOrChromeVar().tabs.query(query, tabs_query_promise);
+            var data = RedditTab.getUrlData(Utils.normalizeUrl(tab.url));
+            if (!data) {
+                data = RedditTab.getUrlData(Utils.normalizeUrl(tab.title));
             }
-        }, 10);
-    } else {
-        OverlayTab.setOverlayTab(tab_id, port);
-        tab = Utils.getTabFromPort(port);
 
-        if (typeof tab !== 'undefined') {
-            var data = RedditTab.getSlugData(port.name);
             if (data) {
-                Background.getLoggedInHash(function (logged_in_hash) {
-                    console.log('Info: Sending action overlayRedditBarData with data', data);
-
-                    port.postMessage({
-                        action: 'overlayRedditBarData',
-                        data: data,
-                        logged_in: Background.isLoggedIn(logged_in_hash)
+                if (!BarTab.getBarClosed(data.slug)) {
+                    sendResponse({
+                        data: data
                     });
+                } else {
+                    console.log('Info: Ignoring bar on this page because it was closed', data);
+                }
+            }
+            break;
+
+        case 'bar_init':
+            var data = RedditTab.getSlugData(request.slug);
+            if (data) {
+                sendResponse({
+                    data: data,
+                    logged_in: RedditTab.isLoggedIn()
                 });
             }
-        }
+            break;
 
-        BarTab.addBarPort(port);
+        case 'bar_action':
+            BarTab.handleBarAction(request.subaction, request.data);
+            break;
+
+        default:
+            console.log(`Error: Invalid request action ${request.action}`);
+            break;
     }
 });
 
-console.log('Info: Background running', Utils.getBrowserOrChrome());
+console.log(`Info: Background running, context '${Utils.getBrowserOrChrome()}'`);

@@ -10,8 +10,6 @@ var Reddit = {
     },
     initEventListeners: function () {
         $(document).on('mousedown', 'a.title', Reddit.redditTitleClicked);
-
-        console.log('Info: Reddit content running');
     },
     redditTitleClicked: function (event) {
         var $target_element = $(event.target);
@@ -26,7 +24,7 @@ var Reddit = {
         // fing parent with class thing
         var $thing = $target_element.closest('.thing');
         if (!$thing.length) {
-            console.log('Error: Unable to locate title parent thing element of target element', $target_element);
+            console.log('Error: Unable to locate parent thing element from target element', $target_element);
 
             return;
         }
@@ -34,10 +32,8 @@ var Reddit = {
         // get data from thing element
         var data = Reddit.getThingData($thing);
         if (data) {
-            console.log('Info: Sending message backgroundThingData with data', data);
-
-            Utils.getBrowserOrChromeVar().runtime.sendMessage({
-                action: 'backgroundThingData',
+            Utils.myRuntimeSendMessage({
+                action: 'reddit_content_data',
                 data: data
             });
         }
@@ -69,17 +65,16 @@ var Reddit = {
     },
     requestLoginCheck: function () {
         var data = {};
-        data.app = 'reddit_bar';
+        data.app = 'my_reddit_companion';
 
         $.ajax({
             url: 'https://www.reddit.com/api/me.json',
             data: data,
             success: function (response) {
-                if (response.data) {
-                    console.log('Info: Setting logged in hash', response.data.modhash);
-
-                    Utils.getBrowserOrChromeVar().storage.local.set({logged_in_hash: response.data.modhash});
-                }
+                Utils.myRuntimeSendMessage({
+                    action: 'reddit_content_logged_in_hash',
+                    logged_in_hash: response.data.modhash || ''
+                });
             }
         });
     }

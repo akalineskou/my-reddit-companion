@@ -4,7 +4,7 @@ var IframeBar = {
     iframe_id: 'reddit_bar',
     stylesheet_id: 'reddit_bar_stylesheet',
     init: function (slug) {
-        console.log('Info: Initialized bar iframe with slug', slug);
+        console.log(`Info: Initializing bar iframe with slug '${slug}'`);
 
         $('head').append($('<link>', {
             id: IframeBar.stylesheet_id,
@@ -26,26 +26,17 @@ var IframeBar = {
     }
 };
 
-var port = Utils.getBrowserOrChromeVar().runtime.connect({
-    name: 'page_overlay'
-});
-
-port.onMessage.addListener(function (request) {
-    console.log('Info: Incoming port message request', request);
-
-    if (request.action === 'overlayRedditBar') {
-        $(window).ready(function () {
-            IframeBar.init(request.data.slug);
-        });
-    }
-});
-
-// Remove any open bars when the extension gets unloaded.
-port.onDisconnect.addListener(function () {
-    IframeBar.removeBar();
-});
-
 $(window).ready(function () {
+    Utils.myRuntimeSendMessage({
+        action: 'page_overlay_init'
+    }, function (response) {
+        if (!Utils.varIsUndefined(response)) {
+            console.log("Info: 'page_overlay_init' response", response);
+
+            IframeBar.init(response.data.slug);
+        }
+    });
+
     // check for messages from iframe
     $(window).on('message', function (event) {
         event = event.originalEvent;
@@ -64,5 +55,3 @@ $(window).ready(function () {
         }
     });
 });
-
-console.log('Info: Page overlay running');
