@@ -1,4 +1,5 @@
 == Version 3.0.5 ==
+* Small changes
 * Add opera extension page
 * Add screenshots folder with one screenshot
 * Change how content scripts talk with background script

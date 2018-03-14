@@ -47,7 +47,7 @@ var BarTab = {
         }
 
         if (action) {
-            BarTab.reditApiCall(action, data);
+            BarTab.redditApiCall(action, data);
         }
     },
     setBarClosed: function (slug) {
@@ -56,7 +56,7 @@ var BarTab = {
     getBarClosed: function (slug) {
         return BarTab.bars_closed[slug];
     },
-    reditApiCall: function (action, data) {
+    redditApiCall: function (action, data) {
         if (RedditTab.isLoggedIn()) {
             data.uh = RedditTab.logged_in_hash;
             data.app = 'my_reddit_companion';
@@ -97,7 +97,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
             if (data) {
                 if (!BarTab.getBarClosed(data.slug)) {
                     sendResponse({
-                        data: data
+                        slug: data.slug
                     });
                 } else {
                     console.log('Info: Ignoring bar on this page because it was closed', data);

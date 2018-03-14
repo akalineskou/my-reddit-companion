@@ -33,7 +33,7 @@ $(window).ready(function () {
         if (!Utils.varIsUndefined(response)) {
             console.log("Info: 'page_overlay_init' response", response);
 
-            IframeBar.init(response.data.slug);
+            IframeBar.init(response.slug);
         }
     });
 
