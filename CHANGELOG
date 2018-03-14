@@ -1,11 +1,13 @@
 == Version 3.0.5 ==
+* Add opera extension page
+* Add screenshots folder with one screenshot
 * Change how content scripts talk with background script
 
 == Version 3.0.4 ==
 * Find data by tab title if data was not found by url
 
 == Version 3.0.3 ==
-* Fix Chrome compatibility issues
+* Fix chrome compatibility issues
 
 == Version 3.0.0 ==
 * Initial commit (major code refactor)
