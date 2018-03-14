@@ -1,11 +1,12 @@
 {
     "name": "My Reddit Companion",
-    "version": "3.0.5",
+    "version": "3.0.6",
     "manifest_version": 2,
     "description": "Best reddit companion on the web",
     "homepage_url": "https://github.com/alex2005git/my-reddit-companion",
     "permissions": [
         "tabs",
+        "webRequest",
         "<all_urls>"
     ],
     "icons": {

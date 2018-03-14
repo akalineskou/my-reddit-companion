@@ -18,6 +18,16 @@ var RedditTab = {
     },
     getSlugData: function (slug) {
         return RedditTab.slugs_data[slug];
+    },
+    setRedirectUrls: function (url_original, url_redirected) {
+        console.log(`Info: Detected redirect from '${url_original}' to '${url_redirected}'`);
+
+        RedditTab.url_original = url_original;
+        RedditTab.url_redirected = url_redirected;
+    },
+    resetRedirectUrls: function () {
+        RedditTab.url_original = null;
+        RedditTab.url_redirected = null;
     }
 };
 
@@ -74,6 +84,14 @@ var BarTab = {
     }
 };
 
+// check for url redirects that might mess up the data matching
+Utils.getBrowserOrChromeVar().webRequest.onBeforeRedirect.addListener(function (response) {
+    RedditTab.setRedirectUrls(response.url, response.redirectUrl);
+}, {
+    urls: ["<all_urls>"]
+});
+
+// listen for contact scripts messages
 Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
     console.log('Info: Incoming background request', request, 'sender', sender);
 
@@ -89,8 +107,16 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
         case 'page_overlay_init':
             var tab = sender.tab;
 
-            var data = RedditTab.getUrlData(Utils.normalizeUrl(tab.url));
+            var tab_url = tab.url;
+            if (tab_url === RedditTab.url_redirected) {
+                tab_url = RedditTab.url_original;
+
+                RedditTab.resetRedirectUrls();
+            }
+
+            var data = RedditTab.getUrlData(Utils.normalizeUrl(tab_url));
             if (!data) {
+                // as a last resort check if url is in title
                 data = RedditTab.getUrlData(Utils.normalizeUrl(tab.title));
             }
 
