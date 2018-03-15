@@ -109,6 +109,11 @@ var Background = {
                     callback();
                 }
             });
+        } else {
+            // when opened in new tab
+            if (Utils.varIsFunction(callback)) {
+                callback();
+            }
         }
     }
 };

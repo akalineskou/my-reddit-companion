@@ -1,3 +1,6 @@
+== Version 3.0.8 ==
+* Fix bar not showing when link opened in new window
+
 == Version 3.0.7 ==
 * Add login check interval
 * Removed reddit login logic from reddit_content to background + more code refactor
