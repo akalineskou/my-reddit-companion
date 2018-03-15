@@ -1,6 +1,6 @@
 {
     "name": "My Reddit Companion",
-    "version": "3.0.6",
+    "version": "3.0.7",
     "manifest_version": 2,
     "description": "Best reddit companion on the web",
     "homepage_url": "https://github.com/alex2005git/my-reddit-companion",
@@ -23,11 +23,11 @@
         {
             "matches": ["<all_urls>"],
             "run_at": "document_start",
-            "js": ["js/debug.js", "js/jquery.js", "js/utils.js", "js/reddit_content.js", "js/page_overlay.js"]
+            "js": ["js/debug.js", "js/jquery.js", "js/utils.js", "js/content_reddit.js", "js/content_overlay.js"]
         }
     ],
     "web_accessible_resources": [
-        "css/page_overlay.css",
-        "html/bar.html"
+        "css/content_overlay.css",
+        "html/content_bar.html"
     ]
 }

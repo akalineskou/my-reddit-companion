@@ -5,8 +5,6 @@ var Reddit = {
         $(document).ready(function () {
             Reddit.initEventListeners();
         });
-
-        Reddit.requestLoginCheck();
     },
     initEventListeners: function () {
         $(document).on('mousedown', 'a.title', Reddit.redditTitleClicked);
@@ -33,7 +31,7 @@ var Reddit = {
         var data = Reddit.getThingData($thing);
         if (data) {
             Utils.myRuntimeSendMessage({
-                action: 'reddit_content_data',
+                action: 'content_reddit_clicked',
                 data: data
             });
         }
@@ -62,21 +60,6 @@ var Reddit = {
         data.is_self = /^self\./.test(data.domain);
 
         return data;
-    },
-    requestLoginCheck: function () {
-        var data = {};
-        data.app = 'my_reddit_companion';
-
-        $.ajax({
-            url: 'https://www.reddit.com/api/me.json',
-            data: data,
-            success: function (response) {
-                Utils.myRuntimeSendMessage({
-                    action: 'reddit_content_logged_in_hash',
-                    logged_in_hash: response.data.modhash || ''
-                });
-            }
-        });
     }
 };
 

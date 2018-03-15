@@ -2,7 +2,7 @@ body {
     padding-top: 30px; 
 }
 
-iframe#reddit_bar {
+iframe#content_bar {
     display: block !important;
 
     height: 30px;
@@ -23,7 +23,7 @@ iframe#reddit_bar {
     right: 0;
 }
 
-html, iframe#reddit_bar {
+html, iframe#content_bar {
     -webkit-transition-property: opacity;
     -webkit-transition-duration: .15s;
 }

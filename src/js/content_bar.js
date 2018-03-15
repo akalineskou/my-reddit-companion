@@ -1,11 +1,11 @@
 /* global Utils */
 
 Utils.myRuntimeSendMessage({
-    action: 'bar_init',
+    action: 'content_bar_init',
     slug: window.location.hash.substr(1) || ''
 }, function (response) {
     if (!Utils.varIsUndefined(response)) {
-        console.log("Info: 'bar_init' response", response);
+        console.log("Info: 'content_bar_init' response", response);
 
         Bar.init(response.data, response.logged_in);
     }
@@ -37,43 +37,51 @@ var Bar = {
         Bar.setBarData();
     },
     setBarData: function () {
-        $('#title').text(Bar.data.title);
+        var $bar = $('#bar');
+        var $title = $('#title');
+        var $score = $('#score');
+        var $subreddit = $('#subreddit');
+        var $comments = $('#comments');
+
+        var permalink = `https://www.reddit.com${Bar.data.permalink}`;
+
+        $title.text(Bar.data.title);
 
         if (Bar.logged_in) {
-            $('#bar').removeClass('logged-out').addClass('logged-in');
+            $bar.removeClass('logged-out').addClass('logged-in');
         } else {
-            $('#bar').removeClass('logged-in').addClass('logged-out');
+            $bar.removeClass('logged-in').addClass('logged-out');
         }
 
         if (Bar.data.permalink) {
-            $('#title').attr('href', `https://www.reddit.com${Bar.data.permalink}`);
+            $title.attr('href', permalink);
         }
 
         if (Bar.data.likes === true) {
-            $('#bar').removeClass('disliked').addClass('liked');
+            $bar.removeClass('disliked').addClass('liked');
         } else if (Bar.data.dislikes === true) {
-            $('#bar').removeClass('liked').addClass('disliked');
+            $bar.removeClass('liked').addClass('disliked');
         } else {
-            $('#bar').removeClass('liked disliked');
+            $bar.removeClass('liked disliked');
         }
 
         if (Bar.data.saved) {
-            $('#bar').addClass('saved');
+            $bar.addClass('saved');
         } else {
-            $('#bar').removeClass('saved');
+            $bar.removeClass('saved');
         }
 
-        $('#score').text(Bar.data.score);
+        $score.text(Bar.data.score);
 
         if (Bar.data.subreddit) {
-            $('#subreddit').text(Bar.data.subreddit);
-            $('#subreddit').attr('href', `https://www.reddit.com/${Bar.data.subreddit}`);
+            $subreddit.text(Bar.data.subreddit);
+            $subreddit.attr('href', `https://www.reddit.com/${Bar.data.subreddit}`);
         } else {
-            $('#bar').removeClass('subreddit');
+            $bar.removeClass('subreddit');
         }
 
-        $('#comments').attr('href', `https://www.reddit.com${Bar.data.permalink}`);
-        $('#comments span').text(Bar.data.num_comments);
+        $comments.attr('href', permalink);
+        $comments.find('span').text(Bar.data.num_comments);
     },
     actionUpvote: function (post_message = true) {
         if (!Bar.data.likes) {
@@ -88,7 +96,7 @@ var Bar = {
                 Bar.actionDownvote(false);
             }
 
-            Bar.actionPostMessage('bar_like');
+            Bar.actionPostMessage('content_bar_like');
             Bar.setBarData();
         }
     },
@@ -105,16 +113,16 @@ var Bar = {
                 Bar.actionUpvote(false);
             }
 
-            Bar.actionPostMessage('bar_dislike');
+            Bar.actionPostMessage('content_bar_dislike');
             Bar.setBarData();
         }
     },
     actionSave: function () {
         var action;
         if (!Bar.data.saved) {
-            action = 'bar_save';
+            action = 'content_bar_save';
         } else {
-            action = 'bar_unsave';
+            action = 'content_bar_unsave';
         }
 
         Bar.data.saved = !Bar.data.saved;
@@ -126,14 +134,15 @@ var Bar = {
         window.open('https://www.reddit.com/login');
     },
     actionClose: function () {
-        Bar.actionPostMessage('bar_close');
         Utils.postMessageToTopWindow({
-            action: 'bar_close'
+            action: 'content_overlay_content_bar_close'
         });
+
+        Bar.actionPostMessage('content_bar_close');
     },
     actionPostMessage: function (action) {
         Utils.myRuntimeSendMessage({
-            action: 'bar_action',
+            action: 'content_bar_action',
             subaction: action,
             data: Bar.data
         });

@@ -1,14 +1,14 @@
 /* global Utils */
 
 var IframeBar = {
-    iframe_id: 'reddit_bar',
-    stylesheet_id: 'reddit_bar_stylesheet',
+    iframe_id: 'content_bar',
+    stylesheet_id: 'content_bar_stylesheet',
     init: function (slug) {
-        console.log(`Info: Initializing bar iframe with slug '${slug}'`);
+        console.log(`Info: Initializing content_bar iframe with slug '${slug}'`);
 
         $('head').append($('<link>', {
             id: IframeBar.stylesheet_id,
-            href: Utils.getBrowserOrChromeVar().extension.getURL('css/page_overlay.css'),
+            href: Utils.getBrowserOrChromeVar().extension.getURL('css/content_overlay.css'),
             type: 'text/css',
             rel: 'stylesheet'
         }));
@@ -17,7 +17,7 @@ var IframeBar = {
             id: IframeBar.iframe_id,
             scrolling: 'no',
             frameborder: 'no',
-            src: Utils.getBrowserOrChromeVar().extension.getURL('html/bar.html#' + encodeURIComponent(slug))
+            src: Utils.getBrowserOrChromeVar().extension.getURL('html/content_bar.html#' + encodeURIComponent(slug))
         }));
     },
     removeBar: function () {
@@ -28,10 +28,10 @@ var IframeBar = {
 
 $(window).ready(function () {
     Utils.myRuntimeSendMessage({
-        action: 'page_overlay_init'
+        action: 'content_overlay_init'
     }, function (response) {
         if (!Utils.varIsUndefined(response)) {
-            console.log("Info: 'page_overlay_init' response", response);
+            console.log("Info: 'content_overlay_init' response", response);
 
             IframeBar.init(response.slug);
         }
@@ -40,14 +40,14 @@ $(window).ready(function () {
     // check for messages from iframe
     $(window).on('message', function (event) {
         event = event.originalEvent;
-        console.log('Info: Message received from bar iframe', event);
+        console.log('Info: Message received from content_bar iframe', event);
 
         if (event.origin === Utils.getBrowserOrChromeVar().extension.getURL('').slice(0, -1)) {
             try {
                 var request = JSON.parse(event.data);
                 console.log('Info: With request', request);
 
-                if (request.action === 'bar_close') {
+                if (request.action === 'content_overlay_content_bar_close') {
                     IframeBar.removeBar();
                 }
             } catch (e) {
