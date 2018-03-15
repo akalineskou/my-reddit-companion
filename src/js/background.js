@@ -2,13 +2,14 @@
 
 var Background = {
     app_name: 'my_reddit_companion',
+    logged_out_interval_delay: 1000 * 60 * 1, // when logged out check every 1 minute
+    logged_in_interval_delay: 1000 * 60 * 10, // when logged in check every 10 minutes
     init: function () {
         Background.resetLoggedInHash();
         Background.resetUrlSlugData();
         Background.resetRedirectUrls();
 
         Background.redditLoginCheck();
-        Background.loginCheckInterval();
     },
     resetUrlSlugData: function () {
         Background.urls_data = {};
@@ -36,32 +37,48 @@ var Background = {
         Background.url_original = null;
         Background.url_redirected = null;
     },
+    setLoggedInHash: function (logged_in_hash) {
+        Background.logged_in_hash = logged_in_hash;
+    },
+    getLoggedInHash: function () {
+        return Background.logged_in_hash;
+    },
     resetLoggedInHash: function () {
-        Background.logged_in_hash = '';
+        Background.setLoggedInHash('');
     },
     isLoggedIn: function () {
-        return !Utils.varIsUndefined(Background.logged_in_hash) && Background.logged_in_hash !== '';
+        return !Utils.varIsUndefined(Background.getLoggedInHash()) && Background.getLoggedInHash() !== '';
     },
     redditLoginCheck: function () {
         Background.resetLoggedInHash();
 
+        if (!Utils.varIsUndefined(Background.login_check_interval)) {
+            window.clearInterval(Background.login_check_interval);
+        }
+
         Background.redditApiRequest('me.json', {}, 'GET', function (response) {
             if (response && response.data) {
-                Background.logged_in_hash = response.data.modhash;
+                Background.setLoggedInHash(response.data.modhash);
             }
+
+            Background.loginCheckInterval(Background.isLoggedIn());
+        }, function () {
+            Background.loginCheckInterval();
         });
     },
-    loginCheckInterval: function () {
-        window.setInterval(Background.redditLoginCheck, 1000 * 60);
+    loginCheckInterval: function (logged_in = false) {
+        var delay = logged_in ? Background.logged_in_interval_delay : Background.logged_out_interval_delay;
+
+        Background.login_check_interval = window.setInterval(Background.redditLoginCheck, delay);
     },
     redditApiCall: function (action, data) {
         if (Background.isLoggedIn()) {
-            data.uh = Background.logged_in_hash;
+            data.uh = Background.getLoggedInHash();
 
             Background.redditApiRequest(action, data);
         }
     },
-    redditApiRequest: function (action, data, method = 'POST', callback) {
+    redditApiRequest: function (action, data, method = 'POST', callback_success, callback_error) {
         data.app = Background.app_name;
 
         console.log(`Info: Sending API action '${action}' with data`, data);
@@ -72,21 +89,23 @@ var Background = {
             dataType: 'json',
             data: data,
             success: function (response) {
-                if (Utils.varIsFunction(callback)) {
-                    callback(response);
+                if (Utils.varIsFunction(callback_success)) {
+                    callback_success(response);
+                }
+            },
+            error: function () {
+                if (Utils.varIsFunction(callback_error)) {
+                    callback_error();
                 }
             }
         });
-    },
-    tabIsReddit: function (tab) {
-        return Utils.testRedditUrl(tab.url);
     },
     parentTabIsReddit: function (tab, callback) {
         var opener_tab_id = tab.openerTabId;
 
         if (!Utils.varIsUndefined(opener_tab_id)) {
             Utils.myTabGet(opener_tab_id, function (parent_tab) {
-                if (Background.tabIsReddit(parent_tab) && Utils.varIsFunction(callback)) {
+                if (Utils.testRedditUrl(parent_tab.url) && Utils.varIsFunction(callback)) {
                     callback();
                 }
             });
@@ -154,13 +173,13 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
 
     var tab = sender.tab;
 
-    var valid_tab = !Background.tabIsReddit(tab);
+    var valid_tab_url = !Utils.testRedditUrl(tab.url);
     if (request.action === 'content_reddit_clicked') {
         // for this action the tab should be reddit
-        valid_tab = !valid_tab;
+        valid_tab_url = !valid_tab_url;
     }
 
-    if (valid_tab) {
+    if (valid_tab_url) {
         var $return = false;
 
         switch (request.action) {
