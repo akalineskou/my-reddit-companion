@@ -1,4 +1,7 @@
 /* bootstrap overrides */
+.btn:focus {
+    box-shadow: none !important;
+}
 
 /* general css overrides */
 body {

@@ -1,4 +1,5 @@
 == Version 3.1.0 ==
+* Remove box shadow from buttons
 * Update readme/todo/screenshots
 * Update url data values after voting/saving + change how bar closed works
 * Redesign UI to be responsive using bootstrap 4
