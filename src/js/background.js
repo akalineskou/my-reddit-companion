@@ -15,14 +15,14 @@ var Background = {
         Background.urls_data = {};
         Background.slugs_data = {};
     },
-    setUrlData: function (url, data) {
+    setUrlData: function (data) {
         if (!data.is_self) {
-            Background.urls_data[url] = data;
+            Background.urls_data[Utils.normalizeUrl(data.url)] = data;
             Background.slugs_data[data.slug] = data;
         }
     },
     getUrlData: function (url) {
-        return Background.urls_data[url];
+        return Background.urls_data[Utils.normalizeUrl(url)];
     },
     getSlugData: function (slug) {
         return Background.slugs_data[slug];
@@ -120,13 +120,6 @@ var Background = {
 
 var BarTab = {
     init: function () {
-        BarTab.resetBarClosed();
-    },
-    resetBarClosed: function () {
-        BarTab.bars_closed = {};
-    },
-    setBarClosed: function (slug) {
-        BarTab.bars_closed[slug] = true;
     },
     getBarClosed: function (slug) {
         return BarTab.bars_closed[slug];
@@ -137,21 +130,39 @@ var BarTab = {
             id: request_data.slug
         };
 
+        var url_data = Background.getUrlData(request_data.url);
+        var valid_data = !Utils.varIsUndefined(url_data);
+
         switch (request_action) {
             case 'content_bar_like':
             case 'content_bar_dislike':
                 action = 'vote';
                 data.dir = request_data.likes === true ? 1 : request_data.dislikes === true ? -1 : 0;
+
+                if (valid_data) {
+                    url_data.likes = request_data.likes;
+                    url_data.dislikes = request_data.dislikes;
+
+                    url_data.score += data.dir;
+                }
                 break;
 
             case 'content_bar_save':
             case 'content_bar_unsave':
                 action = request_action.replace('content_bar_', '');
+
+                if (valid_data) {
+                    url_data.saved = action === 'save';
+                }
                 break;
 
             case 'content_bar_close':
-                BarTab.setBarClosed(request_data.slug);
+                url_data.bar_closed = true;
                 break;
+        }
+
+        if (valid_data) {
+            Background.setUrlData(url_data);
         }
 
         if (action) {
@@ -189,7 +200,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
 
         switch (request.action) {
             case 'content_reddit_clicked':
-                Background.setUrlData(Utils.normalizeUrl(request.data.url), request.data);
+                Background.setUrlData(request.data);
                 break;
 
             case 'content_overlay_init':
@@ -201,14 +212,14 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
 
                     Background.resetRedirectUrls();
 
-                    var data = Background.getUrlData(Utils.normalizeUrl(tab_url));
+                    var data = Background.getUrlData(tab_url);
                     if (!data) {
                         // as a last resort check if url is in title
-                        data = Background.getUrlData(Utils.normalizeUrl(tab.title));
+                        data = Background.getUrlData(tab.title);
                     }
 
                     if (data) {
-                        if (!BarTab.getBarClosed(data.slug)) {
+                        if (Utils.varIsUndefined(data.bar_closed) || !data.bar_closed) {
                             sendResponse({
                                 slug: data.slug
                             });
