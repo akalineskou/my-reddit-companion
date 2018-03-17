@@ -28,7 +28,7 @@ var Background = {
         return Background.slugs_data[slug];
     },
     setRedirectUrls: function (url_original, url_redirected) {
-        console.log(`Info: Detected redirect from '${url_original}' to '${url_redirected}'`);
+        Utils.myConsoleLog('info', `Detected redirect from '${url_original}' to '${url_redirected}'`);
 
         Background.url_original = url_original;
         Background.url_redirected = url_redirected;
@@ -81,10 +81,10 @@ var Background = {
     redditApiRequest: function (action, data, method = 'POST', callback_success, callback_error) {
         data.app = Background.app_name;
 
-        console.log(`Info: Sending API action '${action}' with data`, data);
+        Utils.myConsoleLog('info', `Sending API action '${action}' with data`, data);
 
         $.ajax({
-            url: `https://www.reddit.com/api/${action}`,
+            url: `${Utils.redditUrl()}/api/${action}`,
             type: method,
             dataType: 'json',
             data: data,
@@ -93,7 +93,7 @@ var Background = {
                     callback_success(response);
                 }
             },
-            error: function () {
+            error: function (xhr, ajaxOptions, thrownError) {
                 if (Utils.varIsFunction(callback_error)) {
                     callback_error();
                 }
@@ -174,7 +174,7 @@ Utils.getBrowserOrChromeVar().webRequest.onBeforeRedirect.addListener(function (
 
 // listen for contact scripts messages
 Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    console.log('Info: Incoming background request', request, 'sender', sender);
+    Utils.myConsoleLog('info', 'Incoming background request', request, 'sender', sender);
 
     var tab = sender.tab;
 
@@ -213,7 +213,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                                 slug: data.slug
                             });
                         } else {
-                            console.log('Info: Ignoring bar on this page because it was closed', data);
+                            Utils.myConsoleLog('info', 'Ignoring bar on this page because it was closed', data);
                         }
                     }
                 });
@@ -236,7 +236,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                 break;
 
             default:
-                console.log(`Error: Invalid request action ${request.action}`);
+                Utils.myConsoleLog('error', `Invalid request action ${request.action}`);
                 break;
         }
 
@@ -247,4 +247,4 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
     }
 });
 
-console.log(`Info: Background running, context '${Utils.getBrowserOrChrome()}'`);
+Utils.myConsoleLog('info', `Background running, context '${Utils.getBrowserOrChrome()}'`);

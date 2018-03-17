@@ -1,16 +1,14 @@
-body {
-    padding-top: 30px; 
+.content_overlay_html {
+    /* set css for content overlay page html */
+}
+.content_overlay_body {
+    /* set css for content overlay page body */
 }
 
-iframe#content_bar {
-    display: block !important;
+iframe#content_bar_iframe {
+    opacity: 0; /* set opacity to 0 before showing, to get height from iframe */
 
-    height: 30px;
     width: 100%;
-
-    background: rgb(240, 240, 240);
-    border-bottom: 1px solid rgb(196, 196, 196);
-    box-shadow: 0 0px 1px rgba(100,100,100,.25);
 
     z-index: 9999999;
     overflow: hidden;
@@ -21,9 +19,4 @@ iframe#content_bar {
     top: 0;
     left: 0;
     right: 0;
-}
-
-html, iframe#content_bar {
-    -webkit-transition-property: opacity;
-    -webkit-transition-duration: .15s;
 }

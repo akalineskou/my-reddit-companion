@@ -14,7 +14,7 @@ var Reddit = {
 
         // check element is a link and has title class
         if ('A' !== $target_element.prop("tagName") || !$target_element.hasClass('title')) {
-            console.log('Error: Target element is not a link or does not have class title', $target_element);
+            Utils.myConsoleLog('error', 'Target element is not a link or does not have class title', $target_element);
 
             return;
         }
@@ -22,7 +22,7 @@ var Reddit = {
         // fing parent with class thing
         var $thing = $target_element.closest('.thing');
         if (!$thing.length) {
-            console.log('Error: Unable to locate parent thing element from target element', $target_element);
+            Utils.myConsoleLog('error', 'Unable to locate parent thing element from target element', $target_element);
 
             return;
         }
