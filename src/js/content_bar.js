@@ -122,9 +122,6 @@ var Bar = {
         BarElements.$save.click(function () {
             Bar.actionSave();
         });
-        BarElements.$login.click(function () {
-            Bar.actionLogin();
-        });
         BarElements.$close.click(function () {
             Bar.actionClose();
         });
@@ -200,9 +197,6 @@ var Bar = {
 
         Bar.actionPostMessage(action);
         Bar.setBarData();
-    },
-    actionLogin: function () {
-        window.open(`${Utils.redditUrl()}/login`);
     },
     actionClose: function () {
         $(window).off('resize');
