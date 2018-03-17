@@ -1,87 +1,156 @@
 /* global Utils */
 
-Utils.myRuntimeSendMessage({
-    action: 'content_bar_init',
-    slug: window.location.hash.substr(1) || ''
-}, function (response) {
-    if (!Utils.varIsUndefined(response)) {
-        console.log("Info: 'content_bar_init' response", response);
+$(document).ready(function () {
+    BarElements.init();
 
-        Bar.init(response.data, response.logged_in);
-    }
+    Utils.myRuntimeSendMessage({
+        action: 'content_bar_init',
+        slug: window.location.hash.substr(1) || ''
+    }, function (response) {
+        if (!Utils.varIsUndefined(response)) {
+            Utils.myConsoleLog('info', "'content_bar_init' response", response);
+
+            Bar.init(response.data, response.logged_in);
+        }
+    });
+
+    $(window).resize(Bar.windowResize);
+
+    Utils.postMessageToTopWindow({
+        action: 'content_bar_init',
+        height: BarElements.getBarHeight()
+    });
 });
 
+var BarElements = {
+    init: function () {
+        BarElements.$bar = $('#content_bar');
+
+        BarElements.$logo = BarElements.$bar.find('.content_logo');
+        BarElements.$logo_label = BarElements.$bar.find('.content_logo_label');
+        BarElements.$score = BarElements.$bar.find('.content_score');
+        BarElements.$title = BarElements.$bar.find('.content_title');
+        BarElements.$subreddit = BarElements.$bar.find('.content_subreddit');
+        BarElements.$upvote = BarElements.$bar.find('.content_upvote');
+        BarElements.$downvote = BarElements.$bar.find('.content_downvote');
+        BarElements.$comments = BarElements.$bar.find('.content_comments');
+        BarElements.$save = BarElements.$bar.find('.content_save');
+        BarElements.$login = BarElements.$bar.find('.content_login');
+        BarElements.$close = BarElements.$bar.find('.content_close');
+    },
+    getBarHeight: function () {
+        return BarElements.$bar.height();
+    },
+    toggleBarClasses: function (fluid_container) {
+        BarElements.$bar.toggleClass('container', !fluid_container);
+        BarElements.$bar.toggleClass('container-fluid', fluid_container);
+    },
+    setLogoData: function () {
+        BarElements.$logo.prop('title', 'Return to reddit');
+        BarElements.$logo.prop('href', Utils.redditUrl());
+
+        BarElements.$logo.find('img').prop('alt', 'Reddit logo');
+    },
+    setLogoLabelData: function () {
+        BarElements.$logo_label.text('reddit');
+        BarElements.$logo_label.prop('title', 'Return to reddit');
+        BarElements.$logo_label.prop('href', Utils.redditUrl());
+    },
+    setScoreData: function (score, likes, dislikes) {
+        BarElements.$score.text(score);
+
+        BarElements.$score.toggleClass('btn-outline-secondary', !likes && !dislikes);
+        BarElements.$score.toggleClass('btn-outline-warning', likes || false);
+        BarElements.$score.toggleClass('btn-outline-primary', dislikes || false);
+    },
+    setTitleData: function (title, href) {
+        BarElements.$title.text(title);
+        BarElements.$title.prop('href', href);
+    },
+    setSubredditData: function (hide_subreddit, subreddit) {
+        BarElements.$subreddit.closest('div').toggleClass('display_none', hide_subreddit);
+
+        BarElements.$subreddit.text(subreddit);
+        BarElements.$subreddit.prop('href', `${Utils.redditUrl()}/${subreddit}`);
+    },
+    setLoginData: function (hide_labels) {
+        BarElements.$login.closest('div').toggleClass('display_none', Bar.logged_in);
+        BarElements.$login.find('span').toggleClass('display_none', hide_labels);
+
+        BarElements.$login.prop('href', `${Utils.redditUrl()}/login`);
+    },
+    setUpvoteData: function (hide_labels, likes) {
+        BarElements.$upvote.closest('div').toggleClass('display_none', !Bar.logged_in);
+        BarElements.$upvote.find('span').toggleClass('display_none', hide_labels);
+
+        BarElements.$upvote.toggleClass('active', likes || false);
+    },
+    setDownvoteData: function (hide_labels, dislikes) {
+        BarElements.$downvote.closest('div').toggleClass('display_none', !Bar.logged_in);
+        BarElements.$downvote.find('span').toggleClass('display_none', hide_labels);
+
+        BarElements.$downvote.toggleClass('active', dislikes || false);
+    },
+    setSaveData: function (hide_labels, saved) {
+        BarElements.$save.closest('div').toggleClass('display_none', !Bar.logged_in);
+        BarElements.$save.find('span').toggleClass('display_none', hide_labels);
+
+        BarElements.$save.toggleClass('active', saved);
+    },
+    setCommentsData: function (num_comments, href) {
+        BarElements.$comments.find('span').text(num_comments);
+        BarElements.$comments.prop('href', href);
+    },
+    setLinksParent: function () {
+        BarElements.$bar.find('a').each(function () {
+            $(this).attr('target', '_top');
+        });
+    }
+};
+
 var Bar = {
-    data: null,
-    logged_in: false,
     init: function (data, logged_in) {
         Bar.data = data;
         Bar.logged_in = logged_in;
 
-        $('#upvote').click(function () {
+        BarElements.$upvote.click(function () {
             Bar.actionUpvote();
         });
-        $('#downvote').click(function () {
+        BarElements.$downvote.click(function () {
             Bar.actionDownvote();
         });
-        $('#save').click(function () {
+        BarElements.$save.click(function () {
             Bar.actionSave();
         });
-        $('#login').click(function () {
+        BarElements.$login.click(function () {
             Bar.actionLogin();
         });
-        $('#close').click(function () {
+        BarElements.$close.click(function () {
             Bar.actionClose();
         });
 
         Bar.setBarData();
     },
     setBarData: function () {
-        var $bar = $('#bar');
-        var $title = $('#title');
-        var $score = $('#score');
-        var $subreddit = $('#subreddit');
-        var $comments = $('#comments');
+        var permalink = `${Utils.redditUrl()}${Bar.data.permalink}`;
 
-        var permalink = `https://www.reddit.com${Bar.data.permalink}`;
+        var fluid_container = false;
+        var hide_labels = false;
+        var hide_subreddit = false;
 
-        $title.text(Bar.data.title);
+        BarElements.toggleBarClasses(fluid_container);
+        BarElements.setLogoData();
+        BarElements.setLogoLabelData();
+        BarElements.setScoreData(Bar.data.score, Bar.data.likes, Bar.data.dislikes);
+        BarElements.setTitleData(Bar.data.title, permalink);
+        BarElements.setSubredditData(hide_subreddit, Bar.data.subreddit);
+        BarElements.setLoginData(hide_labels);
+        BarElements.setUpvoteData(hide_labels, Bar.data.likes);
+        BarElements.setDownvoteData(hide_labels, Bar.data.dislikes);
+        BarElements.setSaveData(hide_labels, Bar.data.saved);
+        BarElements.setCommentsData(Bar.data.num_comments, permalink);
 
-        if (Bar.logged_in) {
-            $bar.removeClass('logged-out').addClass('logged-in');
-        } else {
-            $bar.removeClass('logged-in').addClass('logged-out');
-        }
-
-        if (Bar.data.permalink) {
-            $title.attr('href', permalink);
-        }
-
-        if (Bar.data.likes === true) {
-            $bar.removeClass('disliked').addClass('liked');
-        } else if (Bar.data.dislikes === true) {
-            $bar.removeClass('liked').addClass('disliked');
-        } else {
-            $bar.removeClass('liked disliked');
-        }
-
-        if (Bar.data.saved) {
-            $bar.addClass('saved');
-        } else {
-            $bar.removeClass('saved');
-        }
-
-        $score.text(Bar.data.score);
-
-        if (Bar.data.subreddit) {
-            $subreddit.text(Bar.data.subreddit);
-            $subreddit.attr('href', `https://www.reddit.com/${Bar.data.subreddit}`);
-        } else {
-            $bar.removeClass('subreddit');
-        }
-
-        $comments.attr('href', permalink);
-        $comments.find('span').text(Bar.data.num_comments);
+        BarElements.setLinksParent();
     },
     actionUpvote: function (post_message = true) {
         if (!Bar.data.likes) {
@@ -97,8 +166,9 @@ var Bar = {
             }
 
             Bar.actionPostMessage('content_bar_like');
-            Bar.setBarData();
         }
+
+        Bar.setBarData();
     },
     actionDownvote: function (post_message = true) {
         if (!Bar.data.dislikes) {
@@ -114,8 +184,9 @@ var Bar = {
             }
 
             Bar.actionPostMessage('content_bar_dislike');
-            Bar.setBarData();
         }
+
+        Bar.setBarData();
     },
     actionSave: function () {
         var action;
@@ -131,11 +202,14 @@ var Bar = {
         Bar.setBarData();
     },
     actionLogin: function () {
-        window.open('https://www.reddit.com/login');
+        window.open(`${Utils.redditUrl()}/login`);
     },
     actionClose: function () {
+        $(window).off('resize');
+
         Utils.postMessageToTopWindow({
-            action: 'content_overlay_content_bar_close'
+            action: 'content_bar_close',
+            height: BarElements.getBarHeight()
         });
 
         Bar.actionPostMessage('content_bar_close');
@@ -145,6 +219,12 @@ var Bar = {
             action: 'content_bar_action',
             subaction: action,
             data: Bar.data
+        });
+    },
+    windowResize: function () {
+        Utils.postMessageToTopWindow({
+            action: 'content_bar_resize',
+            height: BarElements.getBarHeight()
         });
     }
 };

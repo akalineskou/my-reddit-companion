@@ -2,45 +2,82 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <title>Content bar</title>
+
+        <link rel="stylesheet" href="../libs/bootstrap/css/bootstrap.min.css" type="text/css">
+        <link rel="stylesheet" href="../libs/fontawesome/css/fa-svg-with-js.css" type="text/css">
+
         <link rel="stylesheet" href="../css/content_bar.css" type="text/css">
     </head>
 
     <body>
-        <div id="bar">
-            <a id="logo" href="https://www.reddit.com" title="Return to reddit" target="_top"></a>
+        <div id="content_bar">
+            <div class="row align-items-center">
+                <div class="col-xs-auto">
+                    <a class="text-secondary content_logo">
+                        <img src="../images/reddit-48.png">
+                    </a>
+                </div>
+                <div class="col-xs-auto d-none d-xl-inline">
+                    <a class="text-secondary content_logo_label"></a>
+                </div>
+                <div class="col-xs-auto d-none d-md-inline text-secondary">
+                    <button type="button" class="btn btn-sm content_score" disabled></button>
+                </div>
+                <div class="col">
+                    <a class="btn btn-block text-left content_title"></a>
+                </div>
+                <div class="col-xs-auto d-none d-xl-inline">
+                    <a class="btn btn-block text-secondary content_subreddit"></a>
+                </div>
 
-            <span id="score">?</span>
+                <div class="col-xs-auto">
+                    <a class="btn btn-outline-warning content_login">
+                        <i class="fas fa-key"></i>
+                        <span class="d-none d-xl-inline">Login</span>
+                    </a>
+                </div>
 
-            <a id="title" target="_top"></a>
-            <a id="subreddit" target="_top"></a>
+                <div class="col-xs-auto">
+                    <button type="button" class="btn btn-outline-warning content_upvote">
+                        <i class="fas fa-arrow-up"></i>
+                        <span class="d-none d-xl-inline">Upvote</span>
+                    </button>
+                </div>
+                <div class="col-xs-auto">
+                    <button type="button" class="btn btn-outline-primary content_downvote">
+                        <i class="fas fa-arrow-down"></i>
+                        <span class="d-none d-xl-inline">Downvote</span>
+                    </button>
+                </div>
 
-            <div id="buttons">
-                <button id="upvote" class="if-logged-in">
-                    <span>Upvote</span>
-                </button>
-                <button id="downvote" class="if-logged-in">
-                    <span>Downvote</span>
-                </button>
+                <div class="col-xs-auto d-none d-md-inline">
+                    <a class="btn btn-outline-info content_comments">
+                        <i class="fas fa-comments"></i>
+                        <span></span>
+                    </a>
+                </div>
 
-                <a id="comments" class="button" title="View comments" target="_top">
-                    <span>?</span>
-                </a>
+                <div class="col-xs-auto">
+                    <button type="button" class="btn btn-outline-secondary content_save">
+                        <i class="fas fa-heart"></i>
+                        <span class="d-none d-xl-inline">Save</span>
+                    </button>
+                </div>
 
-                <button id="save" title="Save" class="if-logged-in">
-                    <span></span>
-                </button>
-                <button id="login" class="if-not-logged-in">
-                    <span>Log in...</span>
-                </button>
-
-                <button id="close" title="Close Reddit bar">
-                    <img src="../images/close.svg" alt="close">
-                </button>
+                <div class="col-xs-auto">
+                    <button type="button" class="btn btn-outline-dark content_close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
+        <script type="text/javascript" src="../libs/jquery.js"></script>
+        <script type="text/javascript" src="../libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript" src="../libs/fontawesome/js/fontawesome-all.min.js"></script>
+
         <script type="text/javascript" src="../js/debug.js"></script>
-        <script type="text/javascript" src="../js/jquery.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
         <script type="text/javascript" src="../js/content_bar.js"></script>
     </body>
