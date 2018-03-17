@@ -42,6 +42,15 @@ var Utils = {
             Utils.getBrowserOrChromeVar().tabs.get(tab_id, callback);
         }
     },
+    myStorageGet: function (options, callback) {
+        if (Utils.getBrowserOrChrome() === 'browser') {
+            Utils.getBrowserOrChromeVar().storage.local.get(options).then(callback, function (error) {
+                Utils.myConsoleLog('error', `myStorageGet: '${error}'`);
+            });
+        } else {
+            Utils.getBrowserOrChromeVar().storage.local.get(options, callback);
+        }
+    },
     testRedditUrl: function (url) {
         return /^https?:\/\/([\w-]+\.)?reddit\.com/i.test(url);
     },

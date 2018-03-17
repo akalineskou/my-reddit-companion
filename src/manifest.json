@@ -1,12 +1,13 @@
 {
     "name": "My Reddit Companion",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "manifest_version": 2,
-    "description": "Best reddit companion on the web",
+    "description": "Best Reddit Companion on the web",
     "homepage_url": "https://github.com/alex2005git/my-reddit-companion",
     "permissions": [
         "tabs",
         "webRequest",
+        "storage",
         "<all_urls>"
     ],
     "icons": {
@@ -29,5 +30,8 @@
     "web_accessible_resources": [
         "css/content_overlay.css",
         "html/content_bar.html"
-    ]
+    ],
+    "options_ui": {
+        "page": "html/options.html"
+    }
 }

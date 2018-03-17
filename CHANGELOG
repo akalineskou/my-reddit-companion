@@ -1,3 +1,6 @@
+== Version 3.1.1 ==
+* Add options page with predefined options
+
 == Version 3.1.0 ==
 * Remove login action from content bar
 * Remove box shadow from buttons

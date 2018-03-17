@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Options</title>
+
+        <link rel="stylesheet" href="../libs/bootstrap/css/bootstrap.min.css" type="text/css">
+        <link rel="stylesheet" href="../libs/fontawesome/css/fa-svg-with-js.css" type="text/css">
+
+        <link rel="stylesheet" href="../css/options.css" type="text/css">
+    </head>
+
+    <body>
+        <div class="container-fluid">
+            <form id="options_form">
+                <div class="form-group row">
+                    <div class="col-sm-2 font-weight-bold">Layout</div>
+
+                    <div class="col-sm-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_fluid_container">
+                            <label class="custom-control-label" for="option_fluid_container">Edge to edge layout</label>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="form-group row">
+                    <div class="col-sm-2 font-weight-bold">Options template</div>
+
+                    <div class="col-sm-3">
+                        <select class="custom-select" id="predefined_settings">
+                            <option value="">Select template</option>
+
+                            <option value="full">Full</option>
+                            <option value="compact">Compact</option>
+                            <option value="useful">Useful</option>
+                            <option value="minimal">Minimal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="form-group row">
+                    <div class="col-sm-2 font-weight-bold">Display</div>
+
+                    <div class="col-sm-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_hide_labels">
+                            <label class="custom-control-label" for="option_hide_labels">Hide button labels</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="offset-sm-2 col-sm-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_small_buttons">
+                            <label class="custom-control-label" for="option_small_buttons">Small buttons</label>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="form-group row">
+                    <div class="col-sm-2 font-weight-bold">Settings</div>
+
+                    <div class="col-sm-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_hide_reddit">
+                            <label class="custom-control-label" for="option_hide_reddit">Hide reddit logo text</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="offset-sm-2 col-sm-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_hide_score">
+                            <label class="custom-control-label" for="option_hide_score">Hide score</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="offset-sm-2 col-sm-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_hide_subreddit">
+                            <label class="custom-control-label" for="option_hide_subreddit">Hide subreddit</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="offset-sm-2 col-sm-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_hide_comments">
+                            <label class="custom-control-label" for="option_hide_comments">Hide comments button</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="offset-sm-2 col-sm-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_hide_save">
+                            <label class="custom-control-label" for="option_hide_save">Hide save button</label>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="form-group row">
+                    <div class="offset-sm-2 col-sm-10">
+                        <button type="reset" class="btn btn-secondary">Reset</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <script type="text/javascript" src="../libs/jquery.js"></script>
+        <script type="text/javascript" src="../libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript" src="../libs/fontawesome/js/fontawesome-all.min.js"></script>
+
+        <script type="text/javascript" src="../js/debug.js"></script>
+        <script type="text/javascript" src="../js/utils.js"></script>
+        <script type="text/javascript" src="../js/options.js"></script>
+    </body>
+</html>

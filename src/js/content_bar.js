@@ -41,9 +41,9 @@ var BarElements = {
     getBarHeight: function () {
         return BarElements.$bar.height();
     },
-    toggleBarClasses: function (fluid_container) {
-        BarElements.$bar.toggleClass('container', !fluid_container);
-        BarElements.$bar.toggleClass('container-fluid', fluid_container);
+    toggleBarClasses: function () {
+        BarElements.$bar.toggleClass('container', !Bar.options.fluid_container);
+        BarElements.$bar.toggleClass('container-fluid', Bar.options.fluid_container);
     },
     setLogoData: function () {
         BarElements.$logo.prop('title', 'Return to reddit');
@@ -52,54 +52,70 @@ var BarElements = {
         BarElements.$logo.find('img').prop('alt', 'Reddit logo');
     },
     setLogoLabelData: function () {
+        BarElements.$logo_label.closest('div').toggleClass('display_none', Bar.options.hide_reddit);
+
         BarElements.$logo_label.text('reddit');
         BarElements.$logo_label.prop('title', 'Return to reddit');
         BarElements.$logo_label.prop('href', Utils.redditUrl());
     },
     setScoreData: function (score, likes, dislikes) {
-        BarElements.$score.text(score);
+        BarElements.$score.closest('div').toggleClass('display_none', Bar.options.hide_score);
 
+        BarElements.$score.text(score);
         BarElements.$score.toggleClass('btn-outline-secondary', !likes && !dislikes);
         BarElements.$score.toggleClass('btn-outline-warning', likes || false);
         BarElements.$score.toggleClass('btn-outline-primary', dislikes || false);
+        BarElements.$score.toggleClass('btn-sm', Bar.options.small_buttons);
     },
     setTitleData: function (title, href) {
         BarElements.$title.text(title);
         BarElements.$title.prop('href', href);
+        BarElements.$title.toggleClass('btn-sm', Bar.options.small_buttons);
     },
-    setSubredditData: function (hide_subreddit, subreddit) {
-        BarElements.$subreddit.closest('div').toggleClass('display_none', hide_subreddit);
+    setSubredditData: function (subreddit) {
+        BarElements.$subreddit.closest('div').toggleClass('display_none', Bar.options.hide_subreddit);
 
         BarElements.$subreddit.text(subreddit);
         BarElements.$subreddit.prop('href', `${Utils.redditUrl()}/${subreddit}`);
+        BarElements.$subreddit.toggleClass('btn-sm', Bar.options.small_buttons);
     },
-    setLoginData: function (hide_labels) {
+    setLoginData: function () {
         BarElements.$login.closest('div').toggleClass('display_none', Bar.logged_in);
-        BarElements.$login.find('span').toggleClass('display_none', hide_labels);
+        BarElements.$login.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
         BarElements.$login.prop('href', `${Utils.redditUrl()}/login`);
+        BarElements.$login.toggleClass('btn-sm', Bar.options.small_buttons);
     },
-    setUpvoteData: function (hide_labels, likes) {
+    setUpvoteData: function (likes) {
         BarElements.$upvote.closest('div').toggleClass('display_none', !Bar.logged_in);
-        BarElements.$upvote.find('span').toggleClass('display_none', hide_labels);
+        BarElements.$upvote.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
         BarElements.$upvote.toggleClass('active', likes || false);
+        BarElements.$upvote.toggleClass('btn-sm', Bar.options.small_buttons);
     },
-    setDownvoteData: function (hide_labels, dislikes) {
+    setDownvoteData: function (dislikes) {
         BarElements.$downvote.closest('div').toggleClass('display_none', !Bar.logged_in);
-        BarElements.$downvote.find('span').toggleClass('display_none', hide_labels);
+        BarElements.$downvote.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
         BarElements.$downvote.toggleClass('active', dislikes || false);
-    },
-    setSaveData: function (hide_labels, saved) {
-        BarElements.$save.closest('div').toggleClass('display_none', !Bar.logged_in);
-        BarElements.$save.find('span').toggleClass('display_none', hide_labels);
-
-        BarElements.$save.toggleClass('active', saved);
+        BarElements.$downvote.toggleClass('btn-sm', Bar.options.small_buttons);
     },
     setCommentsData: function (num_comments, href) {
+        BarElements.$comments.closest('div').toggleClass('display_none', Bar.options.hide_comments);
+
         BarElements.$comments.find('span').text(num_comments);
         BarElements.$comments.prop('href', href);
+        BarElements.$comments.toggleClass('btn-sm', Bar.options.small_buttons);
+    },
+    setSaveData: function (saved) {
+        BarElements.$save.closest('div').toggleClass('display_none', Bar.options.hide_save || !Bar.logged_in);
+        BarElements.$save.find('span').toggleClass('display_none', Bar.options.hide_labels);
+
+        BarElements.$save.toggleClass('active', saved);
+        BarElements.$save.toggleClass('btn-sm', Bar.options.small_buttons);
+    },
+    setCloseData: function () {
+        BarElements.$close.toggleClass('btn-sm', Bar.options.small_buttons);
     },
     setLinksParent: function () {
         BarElements.$bar.find('a').each(function () {
@@ -110,42 +126,42 @@ var BarElements = {
 
 var Bar = {
     init: function (data, logged_in) {
-        Bar.data = data;
-        Bar.logged_in = logged_in;
+        Options.getOptions(function (options) {
+            Bar.data = data;
+            Bar.options = options;
+            Bar.logged_in = logged_in;
 
-        BarElements.$upvote.click(function () {
-            Bar.actionUpvote();
-        });
-        BarElements.$downvote.click(function () {
-            Bar.actionDownvote();
-        });
-        BarElements.$save.click(function () {
-            Bar.actionSave();
-        });
-        BarElements.$close.click(function () {
-            Bar.actionClose();
-        });
+            BarElements.$upvote.click(function () {
+                Bar.actionUpvote();
+            });
+            BarElements.$downvote.click(function () {
+                Bar.actionDownvote();
+            });
+            BarElements.$save.click(function () {
+                Bar.actionSave();
+            });
+            BarElements.$close.click(function () {
+                Bar.actionClose();
+            });
 
-        Bar.setBarData();
+            Bar.setBarData();
+        });
     },
     setBarData: function () {
         var permalink = `${Utils.redditUrl()}${Bar.data.permalink}`;
 
-        var fluid_container = false;
-        var hide_labels = false;
-        var hide_subreddit = false;
-
-        BarElements.toggleBarClasses(fluid_container);
+        BarElements.toggleBarClasses();
         BarElements.setLogoData();
         BarElements.setLogoLabelData();
         BarElements.setScoreData(Bar.data.score, Bar.data.likes, Bar.data.dislikes);
         BarElements.setTitleData(Bar.data.title, permalink);
-        BarElements.setSubredditData(hide_subreddit, Bar.data.subreddit);
-        BarElements.setLoginData(hide_labels);
-        BarElements.setUpvoteData(hide_labels, Bar.data.likes);
-        BarElements.setDownvoteData(hide_labels, Bar.data.dislikes);
-        BarElements.setSaveData(hide_labels, Bar.data.saved);
+        BarElements.setSubredditData(Bar.data.subreddit);
+        BarElements.setLoginData();
+        BarElements.setUpvoteData(Bar.data.likes);
+        BarElements.setDownvoteData(Bar.data.dislikes);
         BarElements.setCommentsData(Bar.data.num_comments, permalink);
+        BarElements.setSaveData(Bar.data.saved);
+        BarElements.setCloseData();
 
         BarElements.setLinksParent();
     },
