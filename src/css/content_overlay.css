@@ -1,12 +1,5 @@
-.content_overlay_html {
-    /* set css for content overlay page html */
-}
-.content_overlay_body {
-    /* set css for content overlay page body */
-}
-
 iframe#content_bar_iframe {
-    opacity: 0; /* set opacity to 0 before showing, to get height from iframe */
+    opacity: 0; /* set opacity to 0 before showing, before getting height from iframe */
 
     width: 100%;
 

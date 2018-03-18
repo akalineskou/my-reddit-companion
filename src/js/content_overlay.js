@@ -21,7 +21,9 @@ $(window).ready(function () {
                 var request = JSON.parse(event.data);
                 Utils.myConsoleLog('info', 'With request', request);
 
-                IframeBar.height = request.height;
+                if (!Utils.varIsUndefined(request.height)) {
+                    IframeBar.height = request.height;
+                }
 
                 switch (request.action) {
                     case 'content_bar_init':
@@ -33,7 +35,34 @@ $(window).ready(function () {
                         break;
 
                     case 'content_bar_close':
-                        IframeBar.removeBar();
+                        IframeBar.hideBar(function () {
+                            $(`#${IframeBar.iframe_id}`).remove();
+                            $(`#${IframeBar.stylesheet_id}`).remove();
+                        });
+                        break;
+
+                    case 'content_bar_minimize':
+                        IframeBar.hideBar(function () {
+                            $(`#${IframeBar.iframe_id}`).get(0).contentWindow.postMessage({
+                                action: 'content_overlay_show_maximize'
+                            }, "*");
+                        });
+                        break;
+
+                    case 'content_bar_show_maximize':
+                        IframeBar.showBar();
+                        break;
+
+                    case 'content_bar_maximize':
+                        IframeBar.hideBar(function () {
+                            $(`#${IframeBar.iframe_id}`).get(0).contentWindow.postMessage({
+                                action: 'content_overlay_show_minimize'
+                            }, "*");
+                        });
+                        break;
+
+                    case 'content_bar_show_minimize':
+                        IframeBar.showBar();
                         break;
                 }
             } catch (e) {
@@ -45,7 +74,7 @@ $(window).ready(function () {
 var IframeBar = {
     iframe_id: 'content_bar_iframe',
     stylesheet_id: 'content_bar_stylesheet',
-    slide_animation: 'fast',
+    slide_animation: 100,
     init: function (slug) {
         Utils.myConsoleLog('info', `Initializing content_bar iframe with slug '${slug}'`);
 
@@ -62,29 +91,25 @@ var IframeBar = {
             frameborder: 'no',
             src: Utils.getBrowserOrChromeVar().extension.getURL(`html/content_bar.html#${encodeURIComponent(slug)}`)
         }));
-
-        $('html').addClass('content_overlay_html');
-        $('body').addClass('content_overlay_body');
     },
     showBar: function () {
         $(`#${IframeBar.iframe_id}`).hide();
-        $(`#${IframeBar.iframe_id}`).css('opacity', 1);
 
+        $(`#${IframeBar.iframe_id}`).css('opacity', 1);
         $(`#${IframeBar.iframe_id}`).height(IframeBar.height);
 
         $(`#${IframeBar.iframe_id}`).slideDown(IframeBar.slide_animation);
-        $('body').stop().animate({paddingTop: `+=${IframeBar.height}px`}, IframeBar.slide_animation);
     },
     setHeight: function () {
         $(`#${IframeBar.iframe_id}`).height(IframeBar.height);
-        $('body').css('padding-top', `${IframeBar.height}px`);
     },
-    removeBar: function () {
-        $('body').stop().animate({paddingTop: `-=${IframeBar.height}px`}, IframeBar.slide_animation);
-
+    hideBar: function (callback) {
         $(`#${IframeBar.iframe_id}`).slideUp(IframeBar.slide_animation, function () {
-            $(`#${IframeBar.iframe_id}`).remove();
-            $(`#${IframeBar.stylesheet_id}`).remove();
+            $(`#${IframeBar.iframe_id}`).css('opacity', 0);
+
+            if (Utils.varIsFunction(callback)) {
+                callback();
+            }
         });
     }
 };

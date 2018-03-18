@@ -5,7 +5,6 @@ var Options = {
     default_options: {
         fluid_container: true,
         hide_labels: false,
-        small_buttons: false,
         hide_reddit: false,
         hide_score: false,
         hide_subreddit: false,
@@ -23,7 +22,6 @@ var Options = {
                 switch (selected_value) {
                     case 'full':
                         options.hide_labels = false;
-                        options.small_buttons = false;
                         options.hide_reddit = false;
                         options.hide_score = false;
                         options.hide_subreddit = false;
@@ -33,7 +31,6 @@ var Options = {
 
                     case 'compact':
                         options.hide_labels = true;
-                        options.small_buttons = true;
                         options.hide_reddit = false;
                         options.hide_score = false;
                         options.hide_subreddit = false;
@@ -43,7 +40,6 @@ var Options = {
 
                     case 'useful':
                         options.hide_labels = false;
-                        options.small_buttons = true;
                         options.hide_reddit = true;
                         options.hide_score = true;
                         options.hide_subreddit = true;
@@ -53,7 +49,6 @@ var Options = {
 
                     case 'minimal':
                         options.hide_labels = true;
-                        options.small_buttons = true;
                         options.hide_reddit = true;
                         options.hide_score = true;
                         options.hide_subreddit = true;
