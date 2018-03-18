@@ -1,3 +1,6 @@
+== Version 3.1.2 ==
+* Truncate title if too long
+
 == Version 3.1.1 ==
 * Add options page with predefined options
 

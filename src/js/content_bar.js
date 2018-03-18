@@ -69,6 +69,7 @@ var BarElements = {
     },
     setTitleData: function (title, href) {
         BarElements.$title.text(title);
+        BarElements.$title.prop('title', title);
         BarElements.$title.prop('href', href);
         BarElements.$title.toggleClass('btn-sm', Bar.options.small_buttons);
     },
