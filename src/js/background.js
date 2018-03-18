@@ -200,6 +200,12 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
 
         switch (request.action) {
             case 'content_reddit_clicked':
+                // check if bar was closed and set the old value
+                var data = Background.getUrlData(request.data.url);
+                if (!Utils.varIsUndefined(data)) {
+                    request.data.bar_closed = data.bar_closed;
+                }
+
                 Background.setUrlData(request.data);
                 break;
 
