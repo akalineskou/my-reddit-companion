@@ -24,7 +24,7 @@
         {
             "matches": ["<all_urls>"],
             "run_at": "document_start",
-            "js": ["libs/jquery.js", "js/debug.js", "js/utils.js", "js/content_reddit.js", "js/content_overlay.js"]
+            "js": ["libs/jquery.js", "js/debug.js", "js/utils.js", "js/options.js", "js/content_reddit.js", "js/content_overlay.js"]
         }
     ],
     "web_accessible_resources": [

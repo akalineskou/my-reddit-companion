@@ -42,6 +42,15 @@ var Utils = {
             Utils.getBrowserOrChromeVar().tabs.get(tab_id, callback);
         }
     },
+    myTabQuery: function (query, callback) {
+        if (Utils.getBrowserOrChrome() === 'browser') {
+            Utils.getBrowserOrChromeVar().tabs.query(query).then(callback, function (error) {
+                Utils.myConsoleLog('error', `myTabQuery: '${error}'`);
+            });
+        } else {
+            Utils.getBrowserOrChromeVar().tabs.query(query, callback);
+        }
+    },
     myStorageGet: function (options, callback) {
         if (Utils.getBrowserOrChrome() === 'browser') {
             Utils.getBrowserOrChromeVar().storage.local.get(options).then(callback, function (error) {
@@ -58,7 +67,7 @@ var Utils = {
         return 'https://www.reddit.com';
     },
     myConsoleLog: function (type, ...arguments) {
-        if (Debug.console_logging) {
+        if (Debug.console_logging || type === 'debug') {
             console.log(type.toUpperCase(), ...arguments);
         }
     }

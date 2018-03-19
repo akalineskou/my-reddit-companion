@@ -3,8 +3,11 @@
 var Options = {
     option_prefix: 'option_',
     default_options: {
-        fluid_container: true,
-        transparent_background: true,
+        fluid_container: false,
+        transparent_background: false,
+        start_minimized: false,
+        bar_location_bottom: false,
+        maximize_location_left: false,
         hide_labels: false,
         big_buttons: false,
         hide_reddit: false,
@@ -34,6 +37,7 @@ var Options = {
 
                     case 'compact':
                         options.hide_labels = true;
+                        options.big_buttons = false;
                         options.hide_reddit = false;
                         options.hide_score = false;
                         options.hide_subreddit = false;
@@ -43,6 +47,7 @@ var Options = {
 
                     case 'useful':
                         options.hide_labels = false;
+                        options.big_buttons = false;
                         options.hide_reddit = true;
                         options.hide_score = true;
                         options.hide_subreddit = true;
@@ -52,6 +57,7 @@ var Options = {
 
                     case 'minimal':
                         options.hide_labels = true;
+                        options.big_buttons = false;
                         options.hide_reddit = true;
                         options.hide_score = true;
                         options.hide_subreddit = true;
@@ -62,6 +68,9 @@ var Options = {
 
                 delete options.fluid_container;
                 delete options.transparent_background;
+                delete options.start_minimized;
+                delete options.bar_location_bottom;
+                delete options.maximize_location_left;
 
                 Options.setOptions(options);
 
@@ -69,19 +78,13 @@ var Options = {
                     // small timeout for the user to understand that the change worked (instead of instantly changing it)
                     $this.prop('selectedIndex', 0);
                 }, 50);
+
+                Options.saveOptions();
             });
         });
 
-        $('#options_form').on('submit', function (event) {
-            event.preventDefault();
-
+        $('input[type="checkbox"]').on('change', function () {
             Options.saveOptions();
-        });
-
-        $('#options_form').on('reset', function (event) {
-            event.preventDefault();
-
-            Options.restoreOptions();
         });
     },
     getOptions: function (callback) {

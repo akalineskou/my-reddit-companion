@@ -159,6 +159,13 @@ var BarTab = {
             case 'content_bar_close':
                 url_data.bar_closed = true;
                 break;
+
+            case 'content_bar_minimize':
+                url_data.bar_minimized = true;
+                break;
+            case 'content_bar_maximize':
+                url_data.bar_minimized = false;
+                break;
         }
 
         if (valid_data) {
@@ -183,6 +190,19 @@ Utils.getBrowserOrChromeVar().webRequest.onBeforeRedirect.addListener(function (
     urls: ["<all_urls>"]
 });
 
+// on storage change send a message to all contact script tabs
+Utils.getBrowserOrChromeVar().storage.onChanged.addListener(function () {
+    Utils.myTabQuery({}, function (tabs) {
+        for (var tab of tabs) {
+            Utils.getBrowserOrChromeVar().tabs.sendMessage(
+                    tab.id, {
+                        action: 'background_options_changed'
+                    }
+            );
+        }
+    });
+});
+
 // listen for contact scripts messages
 Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
     Utils.myConsoleLog('info', 'Incoming background request', request, 'sender', sender);
@@ -204,6 +224,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                 var data = Background.getUrlData(request.data.url);
                 if (!Utils.varIsUndefined(data)) {
                     request.data.bar_closed = data.bar_closed;
+                    request.data.bar_minimized = data.bar_minimized;
                 }
 
                 Background.setUrlData(request.data);

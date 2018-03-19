@@ -1,14 +1,18 @@
-/* global Utils */
+/* global Utils, Options */
 
 $(window).ready(function () {
-    Utils.myRuntimeSendMessage({
-        action: 'content_overlay_init'
-    }, function (response) {
-        if (!Utils.varIsUndefined(response)) {
-            Utils.myConsoleLog('info', "'content_overlay_init' response", response);
+    Options.getOptions(function (options) {
+        IframeBar.options = options;
 
-            IframeBar.init(response.slug);
-        }
+        Utils.myRuntimeSendMessage({
+            action: 'content_overlay_init'
+        }, function (response) {
+            if (!Utils.varIsUndefined(response)) {
+                Utils.myConsoleLog('info', "'content_overlay_init' response", response);
+
+                IframeBar.init(response.slug);
+            }
+        });
     });
 
     // check for messages from iframe
@@ -27,6 +31,7 @@ $(window).ready(function () {
 
                 switch (request.action) {
                     case 'content_bar_init':
+                        IframeBar.setIframeClasses();
                         IframeBar.showBar();
                         break;
 
@@ -69,6 +74,21 @@ $(window).ready(function () {
             }
         }
     });
+
+    Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
+        Utils.myConsoleLog('info', 'Incoming content_overlay request', request, 'sender', sender);
+
+        switch (request.action) {
+            case 'background_options_changed':
+                Options.getOptions(function (options) {
+                    IframeBar.options = options;
+
+                    IframeBar.showBar();
+                    IframeBar.setIframeClasses();
+                });
+                break;
+        }
+    });
 });
 
 var IframeBar = {
@@ -102,6 +122,10 @@ var IframeBar = {
     },
     setHeight: function () {
         $(`#${IframeBar.iframe_id}`).height(IframeBar.height);
+    },
+    setIframeClasses: function () {
+        $(`#${IframeBar.iframe_id}`).toggleClass('iframe_top', !IframeBar.options.bar_location_bottom);
+        $(`#${IframeBar.iframe_id}`).toggleClass('iframe_bottom', IframeBar.options.bar_location_bottom);
     },
     hideBar: function (callback) {
         $(`#${IframeBar.iframe_id}`).slideUp(IframeBar.slide_animation, function () {

@@ -10,15 +10,16 @@ $(document).ready(function () {
         if (!Utils.varIsUndefined(response)) {
             Utils.myConsoleLog('info', "'content_bar_init' response", response);
 
-            Bar.init(response.data, response.logged_in);
+            Bar.initData(response.data, response.logged_in);
+            Bar.initBar(function () {
+                Bar.initEvents();
+
+                Utils.postMessageToTopWindow({
+                    action: 'content_bar_init',
+                    height: BarElements.getBarHeight()
+                });
+            });
         }
-    });
-
-    $(window).resize(Bar.windowResize);
-
-    Utils.postMessageToTopWindow({
-        action: 'content_bar_init',
-        height: BarElements.getContentBarHeight()
     });
 
     $(window).on('message', function (event) {
@@ -31,8 +32,7 @@ $(document).ready(function () {
                 case 'content_overlay_show_maximize':
                     $('body').addClass('minimized_bar');
 
-                    BarElements.$content_bar.addClass('display_none');
-                    BarElements.$maximize_bar.removeClass('display_none');
+                    BarElements.showMaximizeBar();
 
                     Utils.postMessageToTopWindow({
                         action: 'content_bar_show_maximize'
@@ -42,10 +42,11 @@ $(document).ready(function () {
                 case 'content_overlay_show_minimize':
                     $('body').removeClass('minimized_bar');
 
-                    BarElements.$content_bar.removeClass('display_none');
-                    BarElements.$maximize_bar.addClass('display_none');
+                    BarElements.showContentBar();
 
-                    $(window).resize(Bar.windowResize);
+                    $(window).resize(function () {
+                        Bar.windowResize(BarElements.getContentBarHeight());
+                    });
 
                     Utils.postMessageToTopWindow({
                         action: 'content_bar_show_minimize'
@@ -54,43 +55,67 @@ $(document).ready(function () {
             }
         }
     });
+
+    Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
+        Utils.myConsoleLog('info', 'Incoming content_bar request', request, 'sender', sender);
+
+        switch (request.action) {
+            case 'background_options_changed':
+                Bar.initBar();
+                break;
+        }
+    });
 });
 
 var Bar = {
-    init: function (data, logged_in) {
-        Options.getOptions(function (options) {
-            Bar.data = data;
-            Bar.options = options;
-            Bar.logged_in = logged_in;
+    initData: function (data, logged_in) {
+        Bar.data = data;
+        Bar.logged_in = logged_in;
+    },
+    initEvents: function () {
+        BarElements.$upvote.click(function () {
+            Bar.actionUpvote();
+        });
+        BarElements.$downvote.click(function () {
+            Bar.actionDownvote();
+        });
+        BarElements.$save.click(function () {
+            Bar.actionSave();
+        });
+        BarElements.$close.click(function () {
+            Bar.actionClose();
+        });
+        BarElements.$minimize.click(function () {
+            Bar.actionMinimize();
+        });
+        BarElements.$maximize.click(function () {
+            Bar.actionMaximize();
+        });
 
-            BarElements.$upvote.click(function () {
-                Bar.actionUpvote();
+        if (!Bar.bar_minimized) {
+            $(window).resize(function () {
+                Bar.windowResize(BarElements.getBarHeight());
             });
-            BarElements.$downvote.click(function () {
-                Bar.actionDownvote();
-            });
-            BarElements.$save.click(function () {
-                Bar.actionSave();
-            });
-            BarElements.$close.click(function () {
-                Bar.actionClose();
-            });
-            BarElements.$minimize.click(function () {
-                Bar.actionMinimize();
-            });
-            BarElements.$maximize.click(function () {
-                Bar.actionMaximize();
-            });
+        }
+    },
+    initBar: function (callback) {
+        Options.getOptions(function (options) {
+            Bar.options = options;
+            Bar.bar_minimized = !Utils.varIsUndefined(Bar.data.bar_minimized) ? Bar.data.bar_minimized : Bar.options.start_minimized;
 
             Bar.setBarData();
+
+            if (Utils.varIsFunction(callback)) {
+                callback();
+            }
         });
     },
     setBarData: function () {
         var permalink = `${Utils.redditUrl()}${Bar.data.permalink}`;
 
-        $('body').toggleClass('transparent_bar', Bar.options.transparent_background);
-
+        BarElements.toggleBodyClasses();
         BarElements.toggleBarClasses();
+
         BarElements.setLogoData();
         BarElements.setLogoLabelData();
         BarElements.setScoreData(Bar.data.score, Bar.data.likes, Bar.data.dislikes);
@@ -160,8 +185,7 @@ var Bar = {
         $(window).off('resize');
 
         Utils.postMessageToTopWindow({
-            action: 'content_bar_close',
-            height: BarElements.getContentBarHeight()
+            action: 'content_bar_close'
         });
 
         Bar.actionPostMessage('content_bar_close');
@@ -169,16 +193,28 @@ var Bar = {
     actionMinimize: function () {
         $(window).off('resize');
 
+        BarElements.showMaximizeBar();
+        var height = BarElements.getMaximizeBarHeight();
+        BarElements.showContentBar();
+
         Utils.postMessageToTopWindow({
-            action: 'content_bar_minimize'
+            action: 'content_bar_minimize',
+            height: height
         });
 
+
         Bar.actionPostMessage('content_bar_minimize');
+
+        Bar.data.bar_minimized = !Bar.data.bar_minimized;
     },
     actionMaximize: function () {
         Utils.postMessageToTopWindow({
             action: 'content_bar_maximize'
         });
+
+        Bar.actionPostMessage('content_bar_maximize');
+
+        Bar.data.bar_minimized = !Bar.data.bar_minimized;
     },
     actionPostMessage: function (action) {
         Utils.myRuntimeSendMessage({
@@ -187,10 +223,10 @@ var Bar = {
             data: Bar.data
         });
     },
-    windowResize: function () {
+    windowResize: function (height) {
         Utils.postMessageToTopWindow({
             action: 'content_bar_resize',
-            height: BarElements.getContentBarHeight()
+            height: height
         });
     }
 };
@@ -212,6 +248,7 @@ var BarElements = {
         BarElements.$minimize = BarElements.$content_bar.find('.content_minimize');
 
         BarElements.$maximize_bar = $('#maximize_bar');
+        BarElements.$maximize_right = BarElements.$maximize_bar.find('.content_maximize_right');
         BarElements.$maximize = BarElements.$maximize_bar.find('.content_maximize');
     },
     getContentBarHeight: function () {
@@ -220,9 +257,35 @@ var BarElements = {
     getMaximizeBarHeight: function () {
         return BarElements.$maximize_bar.height();
     },
+    getBarHeight: function () {
+        return !Bar.bar_minimized ? BarElements.getContentBarHeight() : BarElements.getMaximizeBarHeight();
+    },
+    toggleBodyClasses: function () {
+        $('body').toggleClass('transparent_bar', Bar.options.transparent_background);
+        $('body').toggleClass('minimized_bar', Bar.bar_minimized);
+        $('body').toggleClass('bottom_bar', Bar.options.bar_location_bottom);
+    },
+    showContentBar: function () {
+        BarElements.$content_bar.removeClass('display_none');
+        BarElements.$maximize_bar.addClass('display_none');
+    },
+    showMaximizeBar: function () {
+        BarElements.$content_bar.addClass('display_none');
+        BarElements.$maximize_bar.removeClass('display_none');
+    },
     toggleBarClasses: function () {
         BarElements.$content_bar.toggleClass('container', !Bar.options.fluid_container);
         BarElements.$content_bar.toggleClass('container-fluid', Bar.options.fluid_container);
+        BarElements.$content_bar.find('.row').toggleClass('big_buttons', Bar.options.big_buttons);
+
+        BarElements.$maximize_bar.toggleClass('container', !Bar.options.fluid_container);
+        BarElements.$maximize_bar.toggleClass('container-fluid', Bar.options.fluid_container);
+
+        if (!Bar.bar_minimized) {
+            BarElements.showContentBar();
+        } else {
+            BarElements.showMaximizeBar();
+        }
     },
     setLogoData: function () {
         BarElements.$logo.prop('title', 'Return to reddit');
@@ -298,8 +361,16 @@ var BarElements = {
     },
     setMinimizeData: function () {
         BarElements.$minimize.toggleClass('btn-sm', !Bar.options.big_buttons);
+
+        if (Bar.options.bar_location_bottom) {
+            BarElements.$minimize.html(BarElements.$minimize.data('minimize_down'));
+        } else {
+            BarElements.$minimize.html(BarElements.$minimize.data('minimize_up'));
+        }
     },
     setMaximizeData: function () {
+        BarElements.$maximize_right.toggleClass('display_none', Bar.options.maximize_location_left);
+
         BarElements.$maximize.toggleClass('btn-sm', !Bar.options.big_buttons);
         BarElements.$maximize.toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);
     },
