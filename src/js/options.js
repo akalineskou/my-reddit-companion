@@ -6,6 +6,7 @@ var Options = {
         fluid_container: false,
         dark_theme: false,
         transparent_background: false,
+        disable_shadow: false,
         start_minimized: false,
         bar_location_bottom: false,
         maximize_location_left: false,
@@ -17,6 +18,9 @@ var Options = {
         hide_comments: false,
         hide_save: false
     },
+    deleteOptions: [
+        'fluid_container', 'dark_theme', 'transparent_background', 'disable_shadow', 'start_minimized', 'bar_location_bottom', 'maximize_location_left'
+    ],
     init: function () {
         Options.restoreOptions();
 
@@ -26,6 +30,10 @@ var Options = {
 
             Options.getOptions(function (options) {
                 switch (selected_value) {
+                    case 'default':
+                        options = Options.default_options;
+                        break;
+
                     case 'full':
                         options.hide_labels = false;
                         options.big_buttons = true;
@@ -67,12 +75,9 @@ var Options = {
                         break;
                 }
 
-                delete options.fluid_container;
-                delete options.dark_theme;
-                delete options.transparent_background;
-                delete options.start_minimized;
-                delete options.bar_location_bottom;
-                delete options.maximize_location_left;
+                for (var delete_option in Options.deleteOptions) {
+                    delete options[delete_option];
+                }
 
                 Options.setOptions(options);
 
@@ -86,6 +91,18 @@ var Options = {
         });
 
         $('input[type="checkbox"]').on('change', function () {
+            if ($(this).is(':checked')) {
+                switch (Options.getDataKeyFromElement($(this))) {
+                    case 'dark_theme':
+                        Options.setOptionCheckedProp('transparent_background', false);
+                        break;
+
+                    case 'transparent_background':
+                        Options.setOptionCheckedProp('dark_theme', false);
+                        break;
+                }
+            }
+
             Options.saveOptions();
         });
     },
@@ -120,12 +137,15 @@ var Options = {
     saveOptions: function () {
         var data = {};
         $(`[id^=${Options.option_prefix}]`).each(function () {
-            data[$(this).prop('id').replace(Options.option_prefix, '')] = $(this).is(':checked');
+            data[Options.getDataKeyFromElement($(this))] = $(this).is(':checked');
         });
 
-        Utils.myConsoleLog('info', 'Saving data to local storage', data);
+        Utils.myConsoleLog('debug', 'Saving data to local storage', data);
 
         Utils.getBrowserOrChromeVar().storage.local.set(data);
+    },
+    getDataKeyFromElement: function ($element) {
+        return $element.prop('id').replace(Options.option_prefix, '');
     }
 };
 

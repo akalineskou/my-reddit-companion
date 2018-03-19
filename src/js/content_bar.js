@@ -267,9 +267,9 @@ var BarElements = {
         $('body').toggleClass('light_theme', !Bar.options.dark_theme);
         $('body').toggleClass('dark_theme', Bar.options.dark_theme);
         $('body').toggleClass('transparent_background', Bar.options.transparent_background || Bar.bar_minimized);
-        $('body').toggleClass('box_shadow_bottom', !Bar.options.bar_location_bottom);
-        $('body').toggleClass('box_shadow_top', Bar.options.bar_location_bottom);
-        $('body').toggleClass('box_shadow_initial', Bar.bar_minimized);
+        $('body').toggleClass('box_shadow_bottom', !Bar.options.disable_shadow && !Bar.options.bar_location_bottom);
+        $('body').toggleClass('box_shadow_top', !Bar.options.disable_shadow && Bar.options.bar_location_bottom);
+        $('body').toggleClass('box_shadow_initial', Bar.options.disable_shadow || Bar.bar_minimized);
     },
     showContentBar: function () {
         BarElements.$content_bar.removeClass('display_none');
