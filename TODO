@@ -1,6 +1,8 @@
-Bugs
-* 
-
 Features
+* garbage collection, delete old submissions
+* Check if closed bar is more than x time closed (reopen if so)
 * Add submit bar when clicking on page action icon?
 * Mod buttons?
+
+Bugs
+* 

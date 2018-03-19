@@ -4,6 +4,7 @@ var Options = {
     option_prefix: 'option_',
     default_options: {
         fluid_container: false,
+        dark_theme: false,
         transparent_background: false,
         start_minimized: false,
         bar_location_bottom: false,
@@ -67,6 +68,7 @@ var Options = {
                 }
 
                 delete options.fluid_container;
+                delete options.dark_theme;
                 delete options.transparent_background;
                 delete options.start_minimized;
                 delete options.bar_location_bottom;

@@ -30,7 +30,7 @@ $(document).ready(function () {
         if (!Utils.varIsUndefined(data)) {
             switch (data.action) {
                 case 'content_overlay_show_maximize':
-                    $('body').addClass('minimized_bar');
+                    $('body').addClass('transparent_background box_shadow_initial');
 
                     BarElements.showMaximizeBar();
 
@@ -40,7 +40,10 @@ $(document).ready(function () {
                     break;
 
                 case 'content_overlay_show_minimize':
-                    $('body').removeClass('minimized_bar');
+                    if (!Bar.options.transparent_background) {
+                        $('body').removeClass('transparent_background');
+                    }
+                    $('body').removeClass('box_shadow_initial');
 
                     BarElements.showContentBar();
 
@@ -261,9 +264,12 @@ var BarElements = {
         return !Bar.bar_minimized ? BarElements.getContentBarHeight() : BarElements.getMaximizeBarHeight();
     },
     toggleBodyClasses: function () {
-        $('body').toggleClass('transparent_bar', Bar.options.transparent_background);
-        $('body').toggleClass('minimized_bar', Bar.bar_minimized);
-        $('body').toggleClass('bottom_bar', Bar.options.bar_location_bottom);
+        $('body').toggleClass('light_theme', !Bar.options.dark_theme);
+        $('body').toggleClass('dark_theme', Bar.options.dark_theme);
+        $('body').toggleClass('transparent_background', Bar.options.transparent_background || Bar.bar_minimized);
+        $('body').toggleClass('box_shadow_bottom', !Bar.options.bar_location_bottom);
+        $('body').toggleClass('box_shadow_top', Bar.options.bar_location_bottom);
+        $('body').toggleClass('box_shadow_initial', Bar.bar_minimized);
     },
     showContentBar: function () {
         BarElements.$content_bar.removeClass('display_none');
@@ -371,8 +377,11 @@ var BarElements = {
     setMaximizeData: function () {
         BarElements.$maximize_right.toggleClass('display_none', Bar.options.maximize_location_left);
 
+        BarElements.$maximize.closest('div').toggleClass('light_theme', !Bar.options.dark_theme && !Bar.options.transparent_background);
+        BarElements.$maximize.closest('div').toggleClass('dark_theme', Bar.options.dark_theme && !Bar.options.transparent_background);
+        BarElements.$maximize.closest('div').toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);
+
         BarElements.$maximize.toggleClass('btn-sm', !Bar.options.big_buttons);
-        BarElements.$maximize.toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);
     },
     setLinksParent: function () {
         BarElements.$content_bar.find('a').each(function () {

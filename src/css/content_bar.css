@@ -4,25 +4,6 @@
 }
 
 /* general css overrides */
-body {
-    background-color: #fafafa;
-    box-shadow: inset 0 -10px 10px -10px #444444;
-}
-body.bottom_bar {
-    box-shadow: inset 0 10px 10px -10px #444444;
-}
-body.transparent_bar {
-    background-color: transparent;
-    box-shadow: inset 0 10px 10px -10px #111111;
-}
-body.transparent_bar:not(.bottom_bar):not(.minimized_bar) {
-    box-shadow: inset 0 -10px 10px -10px #111111;
-}
-body.minimized_bar {
-    background-color: transparent;
-    box-shadow: initial;
-}
-
 a:hover {
     text-decoration: none;
 }
@@ -30,6 +11,25 @@ a:hover {
 /* other styles */
 .display_none {
     display: none !important;
+}
+
+.light_theme {
+    background-color: #fafafa;
+}
+.dark_theme {
+    background-color: #2a2a2a;
+}
+.transparent_background {
+    background-color: transparent;
+}
+.box_shadow_bottom {
+    box-shadow: inset 0 -10px 10px -10px #111111;
+}
+.box_shadow_top {
+    box-shadow: inset 0 10px 10px -10px #111111;
+}
+.box_shadow_initial {
+    box-shadow: initial;
 }
 
 /* content bar styles */
@@ -63,5 +63,5 @@ a:hover {
 }
 
 .content_maximize_transparent_fix {
-    background-color: rgb(240, 240, 240);
+    border-radius: .2rem;
 }
