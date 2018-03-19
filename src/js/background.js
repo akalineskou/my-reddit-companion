@@ -4,12 +4,15 @@ var Background = {
     app_name: 'my_reddit_companion',
     logged_out_interval_delay: 1000 * 60 * 1, // when logged out check every 1 minute
     logged_in_interval_delay: 1000 * 60 * 10, // when logged in check every 10 minutes
+    garbage_collection_delay: 1000 * 60 * 5, // check every 5 minutes
+    garbage_collection_check: 1000 * 60 * 60, // delete when last_updated is more than 60 minutes
     init: function () {
         Background.resetLoggedInHash();
         Background.resetUrlSlugData();
         Background.resetRedirectUrls();
 
         Background.redditLoginCheck();
+        Background.garbageCollectionInterval();
     },
     resetUrlSlugData: function () {
         Background.urls_data = {};
@@ -115,14 +118,29 @@ var Background = {
                 callback();
             }
         }
+    },
+    garbageCollectionCheck: function () {
+        Utils.myConsoleLog('info', 'Garbage collection check');
+
+        var url_data;
+        for (var url in Background.urls_data) {
+            url_data = Background.urls_data[url];
+
+            if (Date.now() - url_data.last_updated > Background.garbage_collection_check) {
+                Utils.myConsoleLog('info', `Deleted url_data with slug '${url_data.slug}'`);
+
+                delete Background.urls_data[url_data.url];
+                delete Background.slugs_data[url_data.slug];
+            }
+        }
+    },
+    garbageCollectionInterval: function () {
+        window.setInterval(Background.garbageCollectionCheck, Background.garbage_collection_delay);
     }
 };
 
 var BarTab = {
     init: function () {
-    },
-    getBarClosed: function (slug) {
-        return BarTab.bars_closed[slug];
     },
     handleBarAction: function (request_action, request_data) {
         var action;
@@ -169,6 +187,9 @@ var BarTab = {
         }
 
         if (valid_data) {
+            Utils.myConsoleLog('info', `Updated url_data with slug '${url_data.slug}' last_updated`);
+
+            url_data.last_updated = Date.now();
             Background.setUrlData(url_data);
         }
 
@@ -226,6 +247,8 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                     request.data.bar_closed = data.bar_closed;
                     request.data.bar_minimized = data.bar_minimized;
                 }
+
+                request.data.last_updated = Date.now();
 
                 Background.setUrlData(request.data);
                 break;
