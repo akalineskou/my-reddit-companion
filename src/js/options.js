@@ -31,7 +31,7 @@ var Options = {
             Options.getOptions(function (options) {
                 switch (selected_value) {
                     case 'default':
-                        options = Options.default_options;
+                        options = $.extend(Options.default_options);
                         break;
 
                     case 'full':
@@ -76,7 +76,7 @@ var Options = {
                 }
 
                 for (var delete_option in Options.deleteOptions) {
-                    delete options[delete_option];
+                    delete options[Options.deleteOptions[delete_option]];
                 }
 
                 Options.setOptions(options);

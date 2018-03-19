@@ -1,3 +1,6 @@
+== Version 3.1.6 ==
+* Fix predefined settings default delete indexes
+
 == Version 3.1.5 ==
 * Add no box shadow option + small option changes
 
