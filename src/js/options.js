@@ -6,6 +6,7 @@ var Options = {
         fluid_container: true,
         transparent_background: true,
         hide_labels: false,
+        big_buttons: false,
         hide_reddit: false,
         hide_score: false,
         hide_subreddit: false,
@@ -23,6 +24,7 @@ var Options = {
                 switch (selected_value) {
                     case 'full':
                         options.hide_labels = false;
+                        options.big_buttons = true;
                         options.hide_reddit = false;
                         options.hide_score = false;
                         options.hide_subreddit = false;

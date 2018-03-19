@@ -63,8 +63,6 @@ var Bar = {
             Bar.options = options;
             Bar.logged_in = logged_in;
 
-            Bar.options.small_buttons = true;
-
             BarElements.$upvote.click(function () {
                 Bar.actionUpvote();
             });
@@ -246,7 +244,7 @@ var BarElements = {
         BarElements.$score.toggleClass('btn-outline-secondary', !likes && !dislikes);
         BarElements.$score.toggleClass('btn-outline-warning', likes || false);
         BarElements.$score.toggleClass('btn-outline-primary', dislikes || false);
-        BarElements.$score.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$score.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setTitleData: function (title, href) {
         BarElements.$title.text(title);
@@ -258,51 +256,51 @@ var BarElements = {
 
         BarElements.$subreddit.text(subreddit);
         BarElements.$subreddit.prop('href', `${Utils.redditUrl()}/${subreddit}`);
-        BarElements.$subreddit.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$subreddit.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setLoginData: function () {
         BarElements.$login.closest('div').toggleClass('display_none', Bar.logged_in);
         BarElements.$login.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
         BarElements.$login.prop('href', `${Utils.redditUrl()}/login`);
-        BarElements.$login.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$login.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setUpvoteData: function (likes) {
         BarElements.$upvote.closest('div').toggleClass('display_none', !Bar.logged_in);
         BarElements.$upvote.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
         BarElements.$upvote.toggleClass('active', likes || false);
-        BarElements.$upvote.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$upvote.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setDownvoteData: function (dislikes) {
         BarElements.$downvote.closest('div').toggleClass('display_none', !Bar.logged_in);
         BarElements.$downvote.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
         BarElements.$downvote.toggleClass('active', dislikes || false);
-        BarElements.$downvote.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$downvote.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setCommentsData: function (num_comments, href) {
         BarElements.$comments.closest('div').toggleClass('display_none', Bar.options.hide_comments);
 
         BarElements.$comments.find('span').text(num_comments);
         BarElements.$comments.prop('href', href);
-        BarElements.$comments.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$comments.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setSaveData: function (saved) {
         BarElements.$save.closest('div').toggleClass('display_none', Bar.options.hide_save || !Bar.logged_in);
         BarElements.$save.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
         BarElements.$save.toggleClass('active', saved);
-        BarElements.$save.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$save.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setCloseData: function () {
-        BarElements.$close.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$close.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setMinimizeData: function () {
-        BarElements.$minimize.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$minimize.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setMaximizeData: function () {
-        BarElements.$maximize.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$maximize.toggleClass('btn-sm', !Bar.options.big_buttons);
         BarElements.$maximize.toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);
     },
     setLinksParent: function () {
