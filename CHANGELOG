@@ -1,4 +1,5 @@
 == Version 3.1.2 ==
+* Add transparent_background option
 * Set bar_closed to new data if bar is closed
 * Add minimize/maximize bar buttons
 * Truncate title if too long

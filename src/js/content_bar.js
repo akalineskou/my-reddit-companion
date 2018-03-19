@@ -29,7 +29,7 @@ $(document).ready(function () {
         if (!Utils.varIsUndefined(data)) {
             switch (data.action) {
                 case 'content_overlay_show_maximize':
-                    $('body').addClass('body_maximize');
+                    $('body').addClass('minimized_bar');
 
                     BarElements.$content_bar.addClass('display_none');
                     BarElements.$maximize_bar.removeClass('display_none');
@@ -40,7 +40,7 @@ $(document).ready(function () {
                     break;
 
                 case 'content_overlay_show_minimize':
-                    $('body').removeClass('body_maximize');
+                    $('body').removeClass('minimized_bar');
 
                     BarElements.$content_bar.removeClass('display_none');
                     BarElements.$maximize_bar.addClass('display_none');
@@ -90,6 +90,8 @@ var Bar = {
     setBarData: function () {
         var permalink = `${Utils.redditUrl()}${Bar.data.permalink}`;
 
+        $('body').toggleClass('transparent_bar', Bar.options.transparent_background);
+
         BarElements.toggleBarClasses();
         BarElements.setLogoData();
         BarElements.setLogoLabelData();
@@ -102,6 +104,8 @@ var Bar = {
         BarElements.setCommentsData(Bar.data.num_comments, permalink);
         BarElements.setSaveData(Bar.data.saved);
         BarElements.setCloseData();
+        BarElements.setMinimizeData();
+        BarElements.setMaximizeData();
 
         BarElements.setLinksParent();
     },
@@ -293,6 +297,13 @@ var BarElements = {
     },
     setCloseData: function () {
         BarElements.$close.toggleClass('btn-sm', Bar.options.small_buttons);
+    },
+    setMinimizeData: function () {
+        BarElements.$minimize.toggleClass('btn-sm', Bar.options.small_buttons);
+    },
+    setMaximizeData: function () {
+        BarElements.$maximize.toggleClass('btn-sm', Bar.options.small_buttons);
+        BarElements.$maximize.toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);
     },
     setLinksParent: function () {
         BarElements.$content_bar.find('a').each(function () {

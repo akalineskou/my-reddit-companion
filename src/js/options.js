@@ -4,6 +4,7 @@ var Options = {
     option_prefix: 'option_',
     default_options: {
         fluid_container: true,
+        transparent_background: true,
         hide_labels: false,
         hide_reddit: false,
         hide_score: false,
@@ -58,6 +59,7 @@ var Options = {
                 }
 
                 delete options.fluid_container;
+                delete options.transparent_background;
 
                 Options.setOptions(options);
 
