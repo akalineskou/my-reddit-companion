@@ -140,7 +140,7 @@ var Options = {
             data[Options.getDataKeyFromElement($(this))] = $(this).is(':checked');
         });
 
-        Utils.myConsoleLog('debug', 'Saving data to local storage', data);
+        Utils.myConsoleLog('info', 'Saving data to local storage', data);
 
         Utils.getBrowserOrChromeVar().storage.local.set(data);
     },

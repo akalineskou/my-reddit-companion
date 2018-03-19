@@ -70,5 +70,8 @@ var Utils = {
         if (Debug.console_logging || type === 'debug') {
             console.log(type.toUpperCase(), ...arguments);
         }
+    },
+    elementIsAnchorTag: function ($element) {
+        return 'A' === $element.prop('tagName');
     }
 };

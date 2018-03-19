@@ -2,19 +2,15 @@
 
 var Reddit = {
     init: function () {
-        $(document).ready(function () {
-            Reddit.initEventListeners();
-        });
+        $(document).on('mousedown', 'a', Reddit.redditLinkClicked);
+        $(document).on('keydown', Reddit.redditLinkKeyed);
     },
-    initEventListeners: function () {
-        $(document).on('mousedown', 'a.title', Reddit.redditTitleClicked);
-    },
-    redditTitleClicked: function (event) {
+    redditLinkClicked: function (event) {
         var $target_element = $(event.target);
 
         // check element is a link and has title class
-        if ('A' !== $target_element.prop("tagName") || !$target_element.hasClass('title')) {
-            Utils.myConsoleLog('error', 'Target element is not a link or does not have class title', $target_element);
+        if (!Utils.elementIsAnchorTag($target_element)) {
+            Utils.myConsoleLog('info', 'Target element is not a link', $target_element);
 
             return;
         }
@@ -22,11 +18,32 @@ var Reddit = {
         // fing parent with class thing
         var $thing = $target_element.closest('.thing');
         if (!$thing.length) {
-            Utils.myConsoleLog('error', 'Unable to locate parent thing element from target element', $target_element);
+            Utils.myConsoleLog('info', 'Unable to locate closest thing element from target element', $target_element);
 
             return;
         }
 
+        Reddit.sendBackgroundMessage($thing);
+    },
+    redditLinkKeyed: function (event) {
+        var $target_element = $(event.target);
+
+        if (Utils.elementIsAnchorTag($target_element)) {
+            // element is an anchor tag
+            Reddit.redditLinkClicked(event);
+        } else {
+            // it was res shortcut
+            var $thing = $target_element.find('.thing.res-selected');
+            if (!$thing.length) {
+                Utils.myConsoleLog('info', 'Unable to locate res-selected child thing element from target element', $target_element);
+
+                return;
+            }
+
+            Reddit.sendBackgroundMessage($thing);
+        }
+    },
+    sendBackgroundMessage: function ($thing) {
         // get data from thing element
         var data = Reddit.getThingData($thing);
         if (data) {
@@ -63,4 +80,6 @@ var Reddit = {
     }
 };
 
-Reddit.init();
+$(document).ready(function () {
+    Reddit.init();
+});
