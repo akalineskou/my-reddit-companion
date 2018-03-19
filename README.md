@@ -3,9 +3,16 @@
 My Reddit Companion is an extension that integrates Reddit into the browser.  
 It has a slick responsive UI using Bootstrap 4.  
 
+## Install
 The Firefox Add-on can be [found here](https://addons.mozilla.org/en-US/firefox/addon/my-reddit-companion).  
 The Chrome Plugin can be [found here](https://chrome.google.com/webstore/detail/my-reddit-companion/ghkmgdhpbkijdnnhodlejkbpehnkoglf).  
 The Opera Extension can be [found here](https://addons.opera.com/en/extensions/details/my-reddit-companion).
+
+## Screenshots
+[Screenshot](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/1-full.jpg)  
+[Screenshot responsive](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/2-responsive.jpg)  
+[Screenshot settings](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/3-settings.jpg)  
+[Screenshot old](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/9-old.jpg)  
 
 ## Features
 
