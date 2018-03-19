@@ -174,6 +174,30 @@ var BarTab = {
                 }
                 break;
 
+            case 'content_bar_spam':
+            case 'content_bar_remove':
+                action = 'remove';
+                if (request_action === 'content_bar_spam') {
+                    data.executed = 'spammed';
+
+                } else {
+                    data.executed = 'removed';
+                    data.spam = false;
+                }
+
+                if (valid_data) {
+                    url_data.is_spammed = true;
+                }
+                break;
+
+            case 'content_bar_approve':
+                action = 'approve';
+
+                if (valid_data) {
+                    url_data.is_spammed = false;
+                }
+                break;
+
             case 'content_bar_close':
                 url_data.bar_closed = true;
                 break;

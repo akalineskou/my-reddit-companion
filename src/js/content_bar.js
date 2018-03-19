@@ -88,6 +88,17 @@ var Bar = {
         BarElements.$close.click(function () {
             Bar.actionClose();
         });
+
+        BarElements.$spam.click(function () {
+            Bar.actionSpam();
+        });
+        BarElements.$remove.click(function () {
+            Bar.actionRemove();
+        });
+        BarElements.$approve.click(function () {
+            Bar.actionApprove();
+        });
+
         BarElements.$minimize.click(function () {
             Bar.actionMinimize();
         });
@@ -129,6 +140,11 @@ var Bar = {
         BarElements.setDownvoteData(Bar.data.dislikes);
         BarElements.setCommentsData(Bar.data.num_comments, permalink);
         BarElements.setSaveData(Bar.data.saved);
+
+        BarElements.setSpamData();
+        BarElements.setRemoveData();
+        BarElements.setApproveData();
+
         BarElements.setCloseData();
         BarElements.setMinimizeData();
         BarElements.setMaximizeData();
@@ -193,6 +209,29 @@ var Bar = {
 
         Bar.actionPostMessage('content_bar_close');
     },
+    actionSpam: function () {
+        Bar.data.is_spammed = !Bar.data.is_spammed;
+        Bar.data.to_approve = null;
+
+        Bar.actionPostMessage('content_bar_spam');
+        Bar.setBarData();
+    },
+    actionRemove: function () {
+        Bar.data.is_spammed = !Bar.data.is_spammed;
+        Bar.data.to_approve = null;
+
+        Bar.actionPostMessage('content_bar_remove');
+        Bar.setBarData();
+    },
+    actionApprove: function () {
+        if (Bar.data.to_approve === null) {
+            Bar.data.is_spammed = !Bar.data.is_spammed;
+        }
+        Bar.data.to_approve = null;
+
+        Bar.actionPostMessage('content_bar_approve');
+        Bar.setBarData();
+    },
     actionMinimize: function () {
         $(window).off('resize');
 
@@ -247,6 +286,11 @@ var BarElements = {
         BarElements.$comments = BarElements.$content_bar.find('.content_comments');
         BarElements.$save = BarElements.$content_bar.find('.content_save');
         BarElements.$login = BarElements.$content_bar.find('.content_login');
+
+        BarElements.$spam = BarElements.$content_bar.find('.content_spam');
+        BarElements.$remove = BarElements.$content_bar.find('.content_remove');
+        BarElements.$approve = BarElements.$content_bar.find('.content_approve');
+
         BarElements.$close = BarElements.$content_bar.find('.content_close');
         BarElements.$minimize = BarElements.$content_bar.find('.content_minimize');
 
@@ -361,6 +405,24 @@ var BarElements = {
 
         BarElements.$save.toggleClass('active', saved);
         BarElements.$save.toggleClass('btn-sm', !Bar.options.big_buttons);
+    },
+    setSpamData: function () {
+        BarElements.$spam.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || Bar.data.is_spammed || Bar.options.hide_mod_icons);
+        BarElements.$spam.find('span').toggleClass('display_none', Bar.options.hide_labels);
+
+        BarElements.$spam.toggleClass('btn-sm', !Bar.options.big_buttons);
+    },
+    setRemoveData: function () {
+        BarElements.$remove.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || Bar.data.is_spammed || Bar.options.hide_mod_icons);
+        BarElements.$remove.find('span').toggleClass('display_none', Bar.options.hide_labels);
+
+        BarElements.$remove.toggleClass('btn-sm', !Bar.options.big_buttons);
+    },
+    setApproveData: function () {
+        BarElements.$approve.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || (!Bar.data.is_spammed && Bar.data.to_approve === null) || Bar.options.hide_mod_icons);
+        BarElements.$approve.find('span').toggleClass('display_none', Bar.options.hide_labels);
+
+        BarElements.$approve.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setCloseData: function () {
         BarElements.$close.toggleClass('btn-sm', !Bar.options.big_buttons);

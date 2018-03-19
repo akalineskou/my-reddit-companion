@@ -10,6 +10,7 @@ var Options = {
         start_minimized: false,
         bar_location_bottom: false,
         maximize_location_left: false,
+        hide_mod_icons: false,
         hide_labels: false,
         big_buttons: false,
         hide_reddit: false,
@@ -19,7 +20,7 @@ var Options = {
         hide_save: false
     },
     deleteOptions: [
-        'fluid_container', 'dark_theme', 'transparent_background', 'disable_shadow', 'start_minimized', 'bar_location_bottom', 'maximize_location_left'
+        'fluid_container', 'dark_theme', 'transparent_background', 'disable_shadow', 'start_minimized', 'bar_location_bottom', 'maximize_location_left', 'hide_mod_icons'
     ],
     init: function () {
         Options.restoreOptions();

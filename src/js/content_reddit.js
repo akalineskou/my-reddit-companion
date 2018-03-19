@@ -23,7 +23,7 @@ var Reddit = {
             return;
         }
 
-        Reddit.sendBackgroundMessage($thing);
+        Reddit.sendDataToBackground($thing);
     },
     redditLinkKeyed: function (event) {
         var $target_element = $(event.target);
@@ -40,13 +40,15 @@ var Reddit = {
                 return;
             }
 
-            Reddit.sendBackgroundMessage($thing);
+            Reddit.sendDataToBackground($thing);
         }
     },
-    sendBackgroundMessage: function ($thing) {
+    sendDataToBackground: function ($thing) {
         // get data from thing element
         var data = Reddit.getThingData($thing);
         if (data) {
+            Utils.myConsoleLog('info', 'Got data from thing', data);
+
             Utils.myRuntimeSendMessage({
                 action: 'content_reddit_clicked',
                 data: data
@@ -71,9 +73,13 @@ var Reddit = {
         data.type = $thing.data('type');
         data.context = $thing.data('context');
         data.gildings = Number($thing.data('gildings'));
-        data.promoted = $thing.data('promoted') === 'true';
-        data.nsfw = $thing.data('nsfw') === 'true';
-        data.spoiler = $thing.data('spoiler') === 'true';
+        data.promoted = String($thing.data('promoted')) === 'true';
+        data.nsfw = String($thing.data('nsfw')) === 'true';
+        data.spoiler = String($thing.data('spoiler')) === 'true';
+        data.is_mod = String($thing.data('can-ban')) === 'true';
+        data.is_spammed = $thing.hasClass('spam');
+        data.to_approve = $thing.find('.approve-button').length > 0 || null;
+        data.is_locked = $thing.hasClass('locked');
         data.is_self = /^self\./.test(data.domain);
 
         return data;
