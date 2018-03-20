@@ -1,3 +1,6 @@
+== Version 3.1.8 ==
+* Fix vendor libraries
+
 == Version 3.1.7 ==
 * Add moderator buttons with hide moderator buttons option
 * Add support for simple enter key press on anchor or RES keyboard shortcuts
