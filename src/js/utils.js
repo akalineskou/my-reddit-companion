@@ -66,6 +66,9 @@ var Utils = {
     redditUrl: function () {
         return 'https://www.reddit.com';
     },
+    redditSubmitUrl: function (url, title) {
+        return `${Utils.redditUrl()}/submit?url=${url}&title=${encodeURIComponent(title)}`;
+    },
     myConsoleLog: function (type, ...arguments) {
         if (Debug.console_logging || type === 'debug') {
             console.log(`%c${type.toUpperCase()}`, Debug.StyleBytype(type), ...arguments);

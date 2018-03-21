@@ -92,11 +92,15 @@ var Background = {
             dataType: 'json',
             data: data,
             success: function (response) {
+                Utils.myConsoleLog('info', `Received API response from action '${action}'`, response);
+
                 if (Utils.varIsFunction(callback_success)) {
                     callback_success(response);
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
+                Utils.myConsoleLog('error', `Received API error from action '${action}'`, xhr, ajaxOptions, thrownError);
+
                 if (Utils.varIsFunction(callback_error)) {
                     callback_error();
                 }
@@ -223,9 +227,6 @@ var BarTab = {
     }
 };
 
-Background.init();
-BarTab.init();
-
 // check for url redirects that might mess up the data matching
 Utils.getBrowserOrChromeVar().webRequest.onBeforeRedirect.addListener(function (response) {
     if (Utils.testRedditUrl(response.originUrl) && response.type === 'main_frame') {
@@ -248,13 +249,23 @@ Utils.getBrowserOrChromeVar().storage.onChanged.addListener(function () {
     });
 });
 
+// set browser action on click listener
+Utils.getBrowserOrChromeVar().browserAction.onClicked.addListener(function (tab) {
+    Utils.getBrowserOrChromeVar().tabs.create({
+        url: Utils.redditSubmitUrl(tab.url, tab.title),
+        openerTabId: tab.id,
+        index: tab.index + 1
+    });
+});
+
 // listen for contact scripts messages
 Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
     Utils.myConsoleLog('info', 'Incoming background request', request, 'sender', sender);
 
     var tab = sender.tab;
+    var tab_url = tab.url;
 
-    var valid_tab_url = !Utils.testRedditUrl(tab.url);
+    var valid_tab_url = !Utils.testRedditUrl(tab_url);
     if (request.action === 'content_reddit_clicked') {
         // for this action the tab should be reddit
         valid_tab_url = !valid_tab_url;
@@ -279,7 +290,6 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
 
             case 'content_overlay_init':
                 Background.parentTabIsReddit(tab, function () {
-                    var tab_url = tab.url;
                     if (tab_url === Background.url_redirected) {
                         tab_url = Background.url_original;
                     }
@@ -287,11 +297,6 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                     Background.resetRedirectUrls();
 
                     var data = Background.getUrlData(tab_url);
-                    if (!data) {
-                        // as a last resort check if url is in title
-                        data = Background.getUrlData(tab.title);
-                    }
-
                     if (data) {
                         if (Utils.varIsUndefined(data.bar_closed) || !data.bar_closed) {
                             sendResponse({
@@ -332,4 +337,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
     }
 });
 
-Utils.myConsoleLog('info', `Background running, context '${Utils.getBrowserOrChrome()}'`);
+Utils.myConsoleLog('info', `Background running with context '${Utils.getBrowserOrChrome()}'`);
+
+Background.init();
+BarTab.init();

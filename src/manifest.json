@@ -1,6 +1,6 @@
 {
     "name": "My Reddit Companion",
-    "version": "3.1.8",
+    "version": "3.1.9",
     "manifest_version": 2,
     "description": "Best Reddit Companion on the web",
     "homepage_url": "https://github.com/alex2005git/my-reddit-companion",
@@ -12,6 +12,8 @@
     ],
     "icons": {
         "16": "images/reddit-16.png",
+        "24": "images/reddit-24.png",
+        "32": "images/reddit-32.png",
         "48": "images/reddit-48.png",
         "64": "images/reddit-64.png",
         "96": "images/reddit-96.png",
@@ -33,5 +35,14 @@
     ],
     "options_ui": {
         "page": "html/options.html"
+    },
+    "browser_action": {
+        "default_title": "Submit to Reddit",
+        "default_icon": {
+            "16": "images/reddit-16.png",
+            "24": "images/reddit-24.png",
+            "32": "images/reddit-32.png",
+            "48": "images/reddit-48.png"
+        }
     }
 }
