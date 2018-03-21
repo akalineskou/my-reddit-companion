@@ -87,6 +87,19 @@ $(window).ready(function () {
                     IframeBar.setIframeClasses();
                 });
                 break;
+
+            case 'background_content_overlay_init':
+                // set a small delay to allow the DOM content to change
+                window.setTimeout(function () {
+                    if (!IframeBar.barExists()) {
+                        IframeBar.init(request.slug);
+                    }
+                }, 300);
+                break;
+
+            case 'background_content_overlay_remove':
+                IframeBar.closeBar();
+                break;
         }
     });
 });
@@ -135,5 +148,16 @@ var IframeBar = {
                 callback();
             }
         });
+    },
+    barExists: function () {
+        return $(`#${IframeBar.iframe_id}`).length > 0;
+    },
+    closeBar: function () {
+        if (IframeBar.barExists()) {
+            IframeBar.hideBar(function () {
+                $(`#${IframeBar.iframe_id}`).remove();
+                $(`#${IframeBar.stylesheet_id}`).remove();
+            });
+        }
     }
 };

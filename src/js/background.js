@@ -1,4 +1,4 @@
-/* global Utils */
+/* global Utils, Options */
 
 var Background = {
     app_name: 'my_reddit_companion',
@@ -7,15 +7,16 @@ var Background = {
     garbage_collection_delay: 1000 * 60 * 5, // check every 5 minutes
     garbage_collection_check: 1000 * 60 * 60, // delete when last_updated is more than 60 minutes
     init: function () {
-        Background.resetLoggedInHash();
-        Background.resetUrlSlugData();
+        Background.initOptions();
+        Background.resetUrlsData();
 
         Background.redditLoginCheck();
         Background.garbageCollectionInterval();
     },
-    resetUrlSlugData: function () {
+    resetUrlsData: function () {
         Background.urls_data = {};
         Background.urls_redirected = {};
+        Background.urls_tab = {};
         Background.slugs_data = {};
     },
     setUrlsData: function (data) {
@@ -95,6 +96,24 @@ var Background = {
                 Utils.myConsoleLog('info', `Deleted original url '${original_url}' redirected url '${url_redirected}'`);
 
                 delete Background.urls_redirected[url_redirected];
+            }
+        }
+    },
+    setUrlTab: function (tab_id, url) {
+        if (tab_id > 0) {
+            Background.urls_tab[tab_id] = url;
+        }
+    },
+    deleteUrlsTab: function () {
+        var tab_url;
+        for (var tab_id in Background.urls_tab) {
+            tab_url = Background.urls_tab[tab_id];
+
+            // delete urls_tab when tab_url is not an index in urls_data anymore
+            if (Utils.varIsUndefined(Background.urls_data[tab_url])) {
+                Utils.myConsoleLog('info', `Deleted tab url '${tab_url}' tab id '${tab_id}'`);
+
+                delete Background.urls_tab[tab_id];
             }
         }
     },
@@ -186,9 +205,15 @@ var Background = {
 
         Background.deleteUrlsData();
         Background.deleteUrlsRedirected();
+        Background.deleteUrlsTab();
     },
     garbageCollectionInterval: function () {
         window.setInterval(Background.garbageCollectionCheck, Background.garbage_collection_delay);
+    },
+    initOptions: function () {
+        Options.getOptions(function (options) {
+            Background.options = options;
+        });
     }
 };
 
@@ -282,6 +307,8 @@ Utils.getBrowserOrChromeVar().webRequest.onBeforeRedirect.addListener(function (
 
 // on storage change send a message to all contact script tabs
 Utils.getBrowserOrChromeVar().storage.onChanged.addListener(function () {
+    Background.initOptions();
+
     Utils.myTabQuery({}, function (tabs) {
         for (var tab of tabs) {
             Utils.getBrowserOrChromeVar().tabs.sendMessage(
@@ -300,6 +327,36 @@ Utils.getBrowserOrChromeVar().browserAction.onClicked.addListener(function (tab)
         openerTabId: tab.id,
         index: tab.index + 1
     });
+});
+
+// check for tabs url changes
+Utils.getBrowserOrChromeVar().tabs.onUpdated.addListener(function (tab_id, changeInfo, tab) {
+    if (changeInfo.status === 'complete') {
+        Utils.myConsoleLog('info', `Detected tab id ${tab_id} info change`, changeInfo);
+
+        // check for tab id data
+        var tab_url = Background.urls_tab[tab_id];
+
+        if (!Utils.varIsUndefined(tab_url)) {
+            var data = Background.getUrlData(tab_url);
+
+            if (!Utils.varIsUndefined(data)) {
+                var action;
+                if (!Utils.varIsUndefined(changeInfo.url)) {
+                    action = `background_content_overlay_${Background.options.persist_bar ? 'init' : 'remove'}`;
+                }
+
+                if (!Utils.varIsUndefined(action)) {
+                    Utils.getBrowserOrChromeVar().tabs.sendMessage(
+                            tab_id, {
+                                action: action,
+                                slug: data.slug
+                            }
+                    );
+                }
+            }
+        }
+    }
 });
 
 // listen for contact scripts messages
@@ -333,6 +390,8 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                 Background.parentTabIsReddit(tab, function () {
                     var data = Background.getUrlData(tab.url);
                     if (data) {
+                        Background.setUrlTab(tab.id, tab.url);
+
                         if (Utils.varIsUndefined(data.bar_closed) || !data.bar_closed) {
                             sendResponse({
                                 slug: data.slug
