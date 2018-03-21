@@ -1,4 +1,5 @@
 == Version 3.1.9 ==
+* Fix links that redirect not showing reddit bar + improve garbage collection
 * Add submit to reddit browser action
 
 == Version 3.1.8 ==

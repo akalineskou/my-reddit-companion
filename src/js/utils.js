@@ -63,8 +63,8 @@ var Utils = {
     testRedditUrl: function (url) {
         return /^https?:\/\/([\w-]+\.)?reddit\.com/i.test(url);
     },
-    redditUrl: function () {
-        return 'https://www.reddit.com';
+    redditUrl: function (subdomain = 'www') {
+        return `https://${subdomain}.reddit.com`;
     },
     redditSubmitUrl: function (url, title) {
         return `${Utils.redditUrl()}/submit?url=${url}&title=${encodeURIComponent(title)}`;
@@ -76,5 +76,20 @@ var Utils = {
     },
     elementIsAnchorTag: function ($element) {
         return 'A' === $element.prop('tagName');
+    },
+    parseUrlParameters: function (url) {
+        var result = {};
+
+        if (url.indexOf('?') === 0) {
+            url = url.substr(1);
+        }
+
+        url.split("&").forEach(function (part) {
+            var item = part.split("=");
+
+            result[item[0]] = decodeURIComponent(item[1]);
+        });
+
+        return result;
     }
 };

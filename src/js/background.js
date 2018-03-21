@@ -9,36 +9,94 @@ var Background = {
     init: function () {
         Background.resetLoggedInHash();
         Background.resetUrlSlugData();
-        Background.resetRedirectUrls();
 
         Background.redditLoginCheck();
         Background.garbageCollectionInterval();
     },
     resetUrlSlugData: function () {
         Background.urls_data = {};
+        Background.urls_redirected = {};
         Background.slugs_data = {};
     },
-    setUrlData: function (data) {
+    setUrlsData: function (data) {
         if (!data.is_self) {
-            Background.urls_data[Utils.normalizeUrl(data.url)] = data;
+            data.last_updated = Date.now();
+
+            var url = Utils.normalizeUrl(data.url);
+
+            Utils.myConsoleLog('info', `Set data for url '${url}' slug '${data.slug}'`, data);
+
+            Background.urls_data[url] = data;
             Background.slugs_data[data.slug] = data;
         }
     },
-    getUrlData: function (url) {
-        return Background.urls_data[Utils.normalizeUrl(url)];
+    getUrlData: function (url, check_redirect = true) {
+        url = Utils.normalizeUrl(url);
+
+        var url_data = Background.urls_data[url];
+        if (Utils.varIsUndefined(url_data) && check_redirect) {
+            var original_url = Background.urls_redirected[url];
+
+            if (!Utils.varIsUndefined(original_url)) {
+                url_data = Background.getUrlData(original_url, false);
+
+                if (!Utils.varIsUndefined(url_data)) {
+                    Utils.myConsoleLog('info', `Found url data with orignal url '${original_url}', redirected url  '${url}'`);
+                } else {
+                    Utils.myConsoleLog('error', `No url data found with orignal url '${original_url}', redirected url  '${url}'`);
+                }
+            }
+        }
+
+        return url_data;
     },
     getSlugData: function (slug) {
         return Background.slugs_data[slug];
     },
-    setRedirectUrls: function (url_original, url_redirected) {
-        Utils.myConsoleLog('info', `Detected redirect from '${url_original}' to '${url_redirected}'`);
+    deleteUrlsData: function () {
+        var url_data;
+        for (var url in Background.urls_data) {
+            url_data = Background.urls_data[url];
 
-        Background.url_original = url_original;
-        Background.url_redirected = url_redirected;
+            if (Date.now() - url_data.last_updated > Background.garbage_collection_check) {
+                Utils.myConsoleLog('info', `Deleted url_data for url '${url}' with slug '${url_data.slug}'`);
+
+                delete Background.urls_data[Utils.normalizeUrl(url_data.url)];
+                delete Background.slugs_data[url_data.slug];
+            }
+        }
     },
-    resetRedirectUrls: function () {
-        Background.url_original = null;
-        Background.url_redirected = null;
+    mapUrlRedirectToOriginal: function (url_redirected, url_original) {
+        var url_object = new URL(url_original);
+        if (url_object.origin === Utils.redditUrl('out')) {
+            // extract original url from parsed reddit out url parameter
+            var url_extracted = Utils.parseUrlParameters(url_object.search).url;
+
+            if (Utils.varIsUndefined(url_extracted) || url_extracted === '') {
+                Utils.myConsoleLog('error', `Could not extract url from '${url_object.origin}'`);
+            } else {
+                url_original = url_extracted;
+            }
+        }
+
+        if (url_redirected !== url_original) {
+            Utils.myConsoleLog('info', `Mapped redirected url '${url_redirected}' to original url '${url_original}'`);
+
+            Background.urls_redirected[Utils.normalizeUrl(url_redirected)] = Utils.normalizeUrl(url_original);
+        }
+    },
+    deleteUrlsRedirected: function () {
+        var original_url;
+        for (var url_redirected in Background.urls_redirected) {
+            original_url = Background.urls_redirected[url_redirected];
+
+            // delete urls_redirected when original_url is not an index in urls_data anymore
+            if (Utils.varIsUndefined(Background.urls_data[original_url])) {
+                Utils.myConsoleLog('info', `Deleted original url '${original_url}' redirected url '${url_redirected}'`);
+
+                delete Background.urls_redirected[url_redirected];
+            }
+        }
     },
     setLoggedInHash: function (logged_in_hash) {
         Background.logged_in_hash = logged_in_hash;
@@ -126,17 +184,8 @@ var Background = {
     garbageCollectionCheck: function () {
         Utils.myConsoleLog('info', 'Garbage collection check');
 
-        var url_data;
-        for (var url in Background.urls_data) {
-            url_data = Background.urls_data[url];
-
-            if (Date.now() - url_data.last_updated > Background.garbage_collection_check) {
-                Utils.myConsoleLog('info', `Deleted url_data with slug '${url_data.slug}'`);
-
-                delete Background.urls_data[url_data.url];
-                delete Background.slugs_data[url_data.slug];
-            }
-        }
+        Background.deleteUrlsData();
+        Background.deleteUrlsRedirected();
     },
     garbageCollectionInterval: function () {
         window.setInterval(Background.garbageCollectionCheck, Background.garbage_collection_delay);
@@ -215,10 +264,7 @@ var BarTab = {
         }
 
         if (valid_data) {
-            Utils.myConsoleLog('info', `Updated url_data with slug '${url_data.slug}' last_updated`);
-
-            url_data.last_updated = Date.now();
-            Background.setUrlData(url_data);
+            Background.setUrlsData(url_data);
         }
 
         if (action) {
@@ -229,9 +275,7 @@ var BarTab = {
 
 // check for url redirects that might mess up the data matching
 Utils.getBrowserOrChromeVar().webRequest.onBeforeRedirect.addListener(function (response) {
-    if (Utils.testRedditUrl(response.originUrl) && response.type === 'main_frame') {
-        Background.setRedirectUrls(response.url, response.redirectUrl);
-    }
+    Background.mapUrlRedirectToOriginal(response.redirectUrl, response.url);
 }, {
     urls: ["<all_urls>"]
 });
@@ -260,12 +304,11 @@ Utils.getBrowserOrChromeVar().browserAction.onClicked.addListener(function (tab)
 
 // listen for contact scripts messages
 Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    Utils.myConsoleLog('info', 'Incoming background request', request, 'sender', sender);
+    Utils.myConsoleLog('info', 'Incoming background request', request, 'from sender', sender);
 
     var tab = sender.tab;
-    var tab_url = tab.url;
 
-    var valid_tab_url = !Utils.testRedditUrl(tab_url);
+    var valid_tab_url = !Utils.testRedditUrl(tab.url);
     if (request.action === 'content_reddit_clicked') {
         // for this action the tab should be reddit
         valid_tab_url = !valid_tab_url;
@@ -276,27 +319,19 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
 
         switch (request.action) {
             case 'content_reddit_clicked':
-                // check if bar was closed and set the old value
                 var data = Background.getUrlData(request.data.url);
                 if (!Utils.varIsUndefined(data)) {
+                    // set old values before overriding
                     request.data.bar_closed = data.bar_closed;
                     request.data.bar_minimized = data.bar_minimized;
                 }
 
-                request.data.last_updated = Date.now();
-
-                Background.setUrlData(request.data);
+                Background.setUrlsData(request.data);
                 break;
 
             case 'content_overlay_init':
                 Background.parentTabIsReddit(tab, function () {
-                    if (tab_url === Background.url_redirected) {
-                        tab_url = Background.url_original;
-                    }
-
-                    Background.resetRedirectUrls();
-
-                    var data = Background.getUrlData(tab_url);
+                    var data = Background.getUrlData(tab.url);
                     if (data) {
                         if (Utils.varIsUndefined(data.bar_closed) || !data.bar_closed) {
                             sendResponse({
