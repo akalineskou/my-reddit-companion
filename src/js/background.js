@@ -341,19 +341,12 @@ Utils.getBrowserOrChromeVar().tabs.onUpdated.addListener(function (tab_id, chang
             var data = Background.getUrlData(tab_url);
 
             if (!Utils.varIsUndefined(data)) {
-                var action;
-                if (!Utils.varIsUndefined(changeInfo.url)) {
-                    action = `background_content_overlay_${Background.options.persist_bar ? 'init' : 'remove'}`;
-                }
-
-                if (!Utils.varIsUndefined(action)) {
-                    Utils.getBrowserOrChromeVar().tabs.sendMessage(
-                            tab_id, {
-                                action: action,
-                                slug: data.slug
-                            }
-                    );
-                }
+                Utils.getBrowserOrChromeVar().tabs.sendMessage(
+                        tab_id, {
+                            action: `background_content_overlay_${!Utils.varIsUndefined(changeInfo.url) && !Background.options.persist_bar ? 'remove' : 'init'}`,
+                            slug: data.slug
+                        }
+                );
             }
         }
     }
