@@ -1,3 +1,6 @@
+== Version 3.2.5 ==
+* Added support for multiple page redirects + better garbage collection
+
 == Version 3.2.4 ==
 * Delete trailing '/' when normalizing url
 * Fix jquery conflicts on some websites

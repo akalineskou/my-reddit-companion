@@ -36,7 +36,7 @@ var Background = {
 
         var url_data = Background.urls_data[url];
         if (Utils.varIsUndefined(url_data) && check_redirect) {
-            var original_url = Background.urls_redirected[url];
+            var original_url = Background.getOriginalUrlFromRedirected(url);
 
             if (!Utils.varIsUndefined(original_url)) {
                 url_data = Background.getUrlData(original_url, false);
@@ -49,13 +49,17 @@ var Background = {
             }
         }
 
+        if (!Utils.varIsUndefined(url_data)) {
+            url_data.last_updated = Date.now();
+        }
+
         return url_data;
     },
-    urlDataBarNotClosed: function (data) {
+    urlDataBarClosed: function (data) {
         var bar_closed = false;
 
         if (!Utils.varIsUndefined(data)) {
-            bar_closed = Utils.varIsUndefined(data.bar_closed) || !data.bar_closed;
+            bar_closed = !Utils.varIsUndefined(data.bar_closed) && data.bar_closed;
         }
 
         if (bar_closed) {
@@ -72,7 +76,7 @@ var Background = {
         for (var url in Background.urls_data) {
             url_data = Background.urls_data[url];
 
-            if (Date.now() - url_data.last_updated > Background.garbage_collection_check) {
+            if (url_data.bar_closed || (Date.now() - url_data.last_updated > Background.garbage_collection_check)) {
                 Utils.myConsoleLog('info', `Deleted url_data for url '${url}' with slug '${url_data.slug}'`);
 
                 delete Background.urls_data[Utils.normalizeUrl(url_data.url)];
@@ -96,35 +100,78 @@ var Background = {
         if (url_redirected !== url_original) {
             Utils.myConsoleLog('info', `Mapped redirected url '${url_redirected}' to original url '${url_original}'`);
 
-            Background.urls_redirected[Utils.normalizeUrl(url_redirected)] = Utils.normalizeUrl(url_original);
+            var url_original_data = {
+                url: Utils.normalizeUrl(url_original),
+                last_updated: Date.now()
+            };
+            Background.urls_redirected[Utils.normalizeUrl(url_redirected)] = url_original_data;
         }
     },
-    deleteUrlsRedirected: function () {
+    getOriginalUrlFromRedirected: function (url) {
         var original_url;
-        for (var url_redirected in Background.urls_redirected) {
-            original_url = Background.urls_redirected[url_redirected];
 
-            // delete urls_redirected when original_url is not an index in urls_data anymore
-            if (Utils.varIsUndefined(Background.urls_data[original_url])) {
-                Utils.myConsoleLog('info', `Deleted original url '${original_url}' redirected url '${url_redirected}'`);
+        // init url data
+        var original_url_data = {
+            url: url
+        };
+
+        do {
+            original_url_data = Background.urls_redirected[original_url_data.url];
+
+            if (!Utils.varIsUndefined(original_url_data)) {
+                original_url = original_url_data.url;
+
+                original_url_data.last_updated = Date.now();
+            }
+        } while (!Utils.varIsUndefined(original_url_data));
+
+        return original_url;
+    },
+    deleteUrlsRedirected: function () {
+        var original_url_data;
+        for (var url_redirected in Background.urls_redirected) {
+            original_url_data = Background.urls_redirected[url_redirected];
+
+            if (Date.now() - original_url_data.last_updated > Background.garbage_collection_check) {
+                Utils.myConsoleLog('info', `Deleted original url '${original_url_data.url}' redirected url '${url_redirected}'`);
 
                 delete Background.urls_redirected[url_redirected];
             }
         }
     },
     setUrlTab: function (tab_id, url) {
-        if (tab_id > 0 && Utils.varIsUndefined(Background.urls_tab[tab_id])) {
-            Background.urls_tab[tab_id] = url;
+        if (tab_id > 0) {
+            var tab_url_data;
+
+            if (Utils.varIsUndefined(Background.urls_tab[tab_id])) {
+                tab_url_data = {
+                    url: url,
+                    last_updated: Date.now()
+                };
+
+                Background.urls_tab[tab_id] = tab_url_data;
+            } else {
+                tab_url_data = Background.urls_tab[tab_id];
+                tab_url_data.last_updated = Date.now();
+            }
         }
     },
-    deleteUrlsTab: function () {
-        var tab_url;
-        for (var tab_id in Background.urls_tab) {
-            tab_url = Background.urls_tab[tab_id];
+    getUrlTab: function (tab_id) {
+        var tab_url_data = Background.urls_tab[tab_id];
 
-            // delete urls_tab when tab_url is not an index in urls_data anymore
-            if (Utils.varIsUndefined(Background.urls_data[tab_url])) {
-                Utils.myConsoleLog('info', `Deleted tab url '${tab_url}' tab id '${tab_id}'`);
+        if (!Utils.varIsUndefined(tab_url_data)) {
+            tab_url_data.last_updated = Date.now();
+        }
+
+        return tab_url_data.url;
+    },
+    deleteUrlsTab: function () {
+        var tab_url_data;
+        for (var tab_id in Background.urls_tab) {
+            tab_url_data = Background.urls_tab[tab_id];
+
+            if (Date.now() - tab_url_data.last_updated > Background.garbage_collection_check) {
+                Utils.myConsoleLog('info', `Deleted tab url '${tab_url_data.url}' tab id '${tab_id}'`);
 
                 delete Background.urls_tab[tab_id];
             }
@@ -348,10 +395,10 @@ Utils.getBrowserOrChromeVar().tabs.onUpdated.addListener(function (tab_id, chang
         Utils.myConsoleLog('info', `Detected tab id ${tab_id} info change`, changeInfo);
 
         // check for tab id data
-        var tab_url = Background.urls_tab[tab_id];
+        var tab_url = Background.getUrlTab(tab_id);
         if (!Utils.varIsUndefined(tab_url)) {
             var data = Background.getUrlData(tab_url);
-            if (Background.urlDataBarNotClosed(data)) {
+            if (!Background.urlDataBarClosed(data)) {
                 Utils.getBrowserOrChromeVar().tabs.sendMessage(
                         tab_id, {
                             action: `background_content_overlay_${!Utils.varIsUndefined(changeInfo.url) && !Background.options.persist_bar ? 'remove' : 'init'}`,
@@ -395,7 +442,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                     Background.setUrlTab(tab.id, tab.url);
 
                     var data = Background.getUrlData(tab.url);
-                    if (Background.urlDataBarNotClosed(data)) {
+                    if (!Background.urlDataBarClosed(data)) {
                         sendResponse({
                             slug: data.slug
                         });
