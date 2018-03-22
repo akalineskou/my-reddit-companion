@@ -1,3 +1,6 @@
+== Version 3.2.4 ==
+* Fix jquery conflicts on some websites
+
 == Version 3.2.3 ==
 * Switch fontawesome svg icons to webfonts
 

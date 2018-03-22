@@ -1,12 +1,12 @@
-/* global Utils */
+/* global Utils, myjQuery */
 
 var Reddit = {
     init: function () {
-        $(document).on('mousedown', 'a', Reddit.redditLinkClicked);
-        $(document).on('keydown', Reddit.redditLinkKeyed);
+        myjQuery(document).on('mousedown', 'a', Reddit.redditLinkClicked);
+        myjQuery(document).on('keydown', Reddit.redditLinkKeyed);
     },
     redditLinkClicked: function (event) {
-        var $target_element = $(event.target);
+        var $target_element = myjQuery(event.target);
 
         // check element is a link and has title class
         if (!Utils.elementIsAnchorTag($target_element)) {
@@ -26,7 +26,7 @@ var Reddit = {
         Reddit.sendDataToBackground($thing);
     },
     redditLinkKeyed: function (event) {
-        var $target_element = $(event.target);
+        var $target_element = myjQuery(event.target);
 
         if (Utils.elementIsAnchorTag($target_element)) {
             // element is an anchor tag
@@ -86,6 +86,6 @@ var Reddit = {
     }
 };
 
-$(document).ready(function () {
+myjQuery(document).ready(function () {
     Reddit.init();
 });

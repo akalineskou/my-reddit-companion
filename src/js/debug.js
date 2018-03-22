@@ -1,3 +1,6 @@
+// fix possible jquery conflicts
+myjQuery = jQuery.noConflict(true);
+
 var Debug = {
     console_logging: false,
     StyleBytype: function (type) {

@@ -1,6 +1,6 @@
-/* global Utils, Options */
+/* global Utils, Options, myjQuery */
 
-$(window).ready(function () {
+myjQuery(window).ready(function () {
     Options.getOptions(function (options) {
         IframeBar.options = options;
 
@@ -17,7 +17,7 @@ $(window).ready(function () {
     });
 
     // check for messages from iframe
-    $(window).on('message', function (event) {
+    myjQuery(window).on('message', function (event) {
         event = event.originalEvent;
         Utils.myConsoleLog('info', 'Message received from content_bar iframe', event);
 
@@ -93,8 +93,8 @@ var IframeBar = {
     init: function () {
         Utils.myConsoleLog('info', `Initializing content_bar iframe with slug '${IframeBar.slug}'`);
 
-        if (!$(`#${IframeBar.stylesheet_id}`).length) {
-            $('head').append($('<link>', {
+        if (!myjQuery(`#${IframeBar.stylesheet_id}`).length) {
+            myjQuery('head').append(myjQuery('<link>', {
                 id: IframeBar.stylesheet_id,
                 href: Utils.getBrowserOrChromeVar().extension.getURL('css/content_overlay.css'),
                 type: 'text/css',
@@ -102,7 +102,7 @@ var IframeBar = {
             }));
         }
 
-        $('body').append($('<iframe>', {
+        myjQuery('body').append(myjQuery('<iframe>', {
             id: IframeBar.iframe_id,
             scrolling: 'no',
             frameborder: 'no',
@@ -110,36 +110,36 @@ var IframeBar = {
         }));
     },
     showBar: function () {
-        $(`#${IframeBar.iframe_id}`).hide();
+        myjQuery(`#${IframeBar.iframe_id}`).hide();
 
-        $(`#${IframeBar.iframe_id}`).css('opacity', 1);
-        $(`#${IframeBar.iframe_id}`).css('height', IframeBar.height);
+        myjQuery(`#${IframeBar.iframe_id}`).css('opacity', 1);
+        myjQuery(`#${IframeBar.iframe_id}`).css('height', IframeBar.height);
 
         if (IframeBar.bar_minimized) {
-            $(`#${IframeBar.iframe_id}`).css('width', IframeBar.width);
-            $(`#${IframeBar.iframe_id}`).width(IframeBar.width);
+            myjQuery(`#${IframeBar.iframe_id}`).css('width', IframeBar.width);
+            myjQuery(`#${IframeBar.iframe_id}`).width(IframeBar.width);
 
             var offset_pixels = `4px`;
 
             if (IframeBar.options.big_buttons) {
-                $(`#${IframeBar.iframe_id}`).css(IframeBar.options.bar_location_bottom ? 'bottom' : 'top', offset_pixels);
+                myjQuery(`#${IframeBar.iframe_id}`).css(IframeBar.options.bar_location_bottom ? 'bottom' : 'top', offset_pixels);
             }
-            $(`#${IframeBar.iframe_id}`).css(IframeBar.options.maximize_location_left ? 'left' : 'right', offset_pixels);
+            myjQuery(`#${IframeBar.iframe_id}`).css(IframeBar.options.maximize_location_left ? 'left' : 'right', offset_pixels);
         }
 
-        $(`#${IframeBar.iframe_id}`).slideDown(IframeBar.slide_animation);
+        myjQuery(`#${IframeBar.iframe_id}`).slideDown(IframeBar.slide_animation);
     },
     setHeight: function () {
-        $(`#${IframeBar.iframe_id}`).height(IframeBar.height);
+        myjQuery(`#${IframeBar.iframe_id}`).height(IframeBar.height);
     },
     setIframeClasses: function () {
-        $(`#${IframeBar.iframe_id}`).toggleClass('iframe_top', !IframeBar.options.bar_location_bottom);
-        $(`#${IframeBar.iframe_id}`).toggleClass('iframe_bottom', IframeBar.options.bar_location_bottom);
-        $(`#${IframeBar.iframe_id}`).toggleClass('iframe_left', !IframeBar.bar_minimized);
+        myjQuery(`#${IframeBar.iframe_id}`).toggleClass('iframe_top', !IframeBar.options.bar_location_bottom);
+        myjQuery(`#${IframeBar.iframe_id}`).toggleClass('iframe_bottom', IframeBar.options.bar_location_bottom);
+        myjQuery(`#${IframeBar.iframe_id}`).toggleClass('iframe_left', !IframeBar.bar_minimized);
     },
     hideBar: function (callback) {
-        $(`#${IframeBar.iframe_id}`).slideUp(IframeBar.slide_animation, function () {
-            $(`#${IframeBar.iframe_id}`).css('opacity', 0);
+        myjQuery(`#${IframeBar.iframe_id}`).slideUp(IframeBar.slide_animation, function () {
+            myjQuery(`#${IframeBar.iframe_id}`).css('opacity', 0);
 
             if (Utils.varIsFunction(callback)) {
                 callback();
@@ -147,17 +147,19 @@ var IframeBar = {
         });
     },
     barExists: function () {
-        return $(`#${IframeBar.iframe_id}`).length > 0;
+        return myjQuery(`#${IframeBar.iframe_id}`).length > 0;
     },
     closeBar: function (reinit = false) {
-        if (IframeBar.barExists()) {
-            IframeBar.hideBar(function () {
-                $(`#${IframeBar.iframe_id}`).remove();
+        if (!IframeBar.barExists()) {
+            return;
+        }
 
-                if (reinit) {
-                    IframeBar.init();
-                }
-            });
-    }
+        IframeBar.hideBar(function () {
+            myjQuery(`#${IframeBar.iframe_id}`).remove();
+
+            if (reinit) {
+                IframeBar.init();
+            }
+        });
     }
 };

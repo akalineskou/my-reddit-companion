@@ -1,6 +1,6 @@
-/* global Utils, Options */
+/* global Utils, Options, myjQuery */
 
-$(document).ready(function () {
+myjQuery(document).ready(function () {
     BarElements.init();
 
     Utils.myRuntimeSendMessage({
@@ -64,7 +64,7 @@ var Bar = {
         });
 
         if (!Bar.bar_minimized) {
-            $(window).resize(function () {
+            myjQuery(window).resize(function () {
                 Utils.postMessageToTopWindow({
                     action: 'content_bar_resize',
                     height: BarElements.getBarHeight()
@@ -215,7 +215,7 @@ var Bar = {
 
 var BarElements = {
     init: function () {
-        BarElements.$content_bar = $('#content_bar');
+        BarElements.$content_bar = myjQuery('#content_bar');
         BarElements.$logo = BarElements.$content_bar.find('.content_logo');
         BarElements.$logo_label = BarElements.$content_bar.find('.content_logo_label');
         BarElements.$score = BarElements.$content_bar.find('.content_score');
@@ -234,7 +234,7 @@ var BarElements = {
         BarElements.$close = BarElements.$content_bar.find('.content_close');
         BarElements.$minimize = BarElements.$content_bar.find('.content_minimize');
 
-        BarElements.$maximize_bar = $('#maximize_bar');
+        BarElements.$maximize_bar = myjQuery('#maximize_bar');
         BarElements.$maximize = BarElements.$maximize_bar.find('.content_maximize');
     },
     getContentBarHeight: function () {
@@ -250,12 +250,12 @@ var BarElements = {
         return !Bar.bar_minimized ? '' : BarElements.$maximize.closest('div').width();
     },
     toggleBodyClasses: function () {
-        $('body').toggleClass('light_theme', !Bar.options.dark_theme);
-        $('body').toggleClass('dark_theme', Bar.options.dark_theme);
-        $('body').toggleClass('transparent_background', Bar.options.transparent_background || Bar.bar_minimized);
-        $('body').toggleClass('box_shadow_bottom', !Bar.options.disable_shadow && !Bar.options.bar_location_bottom);
-        $('body').toggleClass('box_shadow_top', !Bar.options.disable_shadow && Bar.options.bar_location_bottom);
-        $('body').toggleClass('box_shadow_initial', Bar.options.disable_shadow || Bar.bar_minimized);
+        myjQuery('body').toggleClass('light_theme', !Bar.options.dark_theme);
+        myjQuery('body').toggleClass('dark_theme', Bar.options.dark_theme);
+        myjQuery('body').toggleClass('transparent_background', Bar.options.transparent_background || Bar.bar_minimized);
+        myjQuery('body').toggleClass('box_shadow_bottom', !Bar.options.disable_shadow && !Bar.options.bar_location_bottom);
+        myjQuery('body').toggleClass('box_shadow_top', !Bar.options.disable_shadow && Bar.options.bar_location_bottom);
+        myjQuery('body').toggleClass('box_shadow_initial', Bar.options.disable_shadow || Bar.bar_minimized);
     },
     showContentBar: function () {
         BarElements.$content_bar.removeClass('display_none');
@@ -384,7 +384,7 @@ var BarElements = {
     },
     setLinksParent: function () {
         BarElements.$content_bar.find('a').each(function () {
-            $(this).attr('target', '_top');
+            myjQuery(this).attr('target', '_top');
         });
     }
 };

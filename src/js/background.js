@@ -1,4 +1,4 @@
-/* global Utils, Options */
+/* global Utils, Options, myjQuery */
 
 var Background = {
     app_name: 'my_reddit_companion',
@@ -176,7 +176,7 @@ var Background = {
 
         Utils.myConsoleLog('info', `Sending API action '${action}' with data`, data);
 
-        $.ajax({
+        myjQuery.ajax({
             url: `${Utils.redditUrl()}/api/${action}`,
             type: method,
             dataType: 'json',

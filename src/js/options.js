@@ -1,4 +1,4 @@
-/* global Utils */
+/* global Utils, myjQuery */
 
 var Options = {
     option_prefix: 'option_',
@@ -26,14 +26,14 @@ var Options = {
     init: function () {
         Options.restoreOptions();
 
-        $('#predefined_settings').on('change', function () {
-            var $this = $(this);
+        myjQuery('#predefined_settings').on('change', function () {
+            var $this = myjQuery(this);
             var selected_value = $this.val();
 
             Options.getOptions(function (options) {
                 switch (selected_value) {
                     case 'default':
-                        options = $.extend(Options.default_options);
+                        options = myjQuery.extend(Options.default_options);
                         break;
 
                     case 'full':
@@ -92,9 +92,9 @@ var Options = {
             });
         });
 
-        $('input[type="checkbox"]').on('change', function () {
-            if ($(this).is(':checked')) {
-                switch (Options.getDataKeyFromElement($(this))) {
+        myjQuery('input[type="checkbox"]').on('change', function () {
+            if (myjQuery(this).is(':checked')) {
+                switch (Options.getDataKeyFromElement(myjQuery(this))) {
                     case 'dark_theme':
                         Options.setOptionCheckedProp('transparent_background', false);
                         break;
@@ -109,7 +109,7 @@ var Options = {
         });
     },
     getOptions: function (callback) {
-        var options = $.extend(Options.default_options);
+        var options = myjQuery.extend(Options.default_options);
 
         Utils.myStorageGet(Object.keys(options), function (stored_options) {
             for (var option in options) {
@@ -134,12 +134,12 @@ var Options = {
         }
     },
     setOptionCheckedProp: function (key, value) {
-        $(`#${Options.option_prefix}${key}`).prop('checked', value);
+        myjQuery(`#${Options.option_prefix}${key}`).prop('checked', value);
     },
     saveOptions: function () {
         var data = {};
-        $(`[id^=${Options.option_prefix}]`).each(function () {
-            data[Options.getDataKeyFromElement($(this))] = $(this).is(':checked');
+        myjQuery(`[id^=${Options.option_prefix}]`).each(function () {
+            data[Options.getDataKeyFromElement(myjQuery(this))] = myjQuery(this).is(':checked');
         });
 
         Utils.myConsoleLog('info', 'Saving data to local storage', data);
@@ -151,6 +151,6 @@ var Options = {
     }
 };
 
-$(document).ready(function () {
+myjQuery(document).ready(function () {
     Options.init();
 });
