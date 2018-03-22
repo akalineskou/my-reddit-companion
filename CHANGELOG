@@ -1,4 +1,5 @@
 == Version 3.2.4 ==
+* Delete trailing '/' when normalizing url
 * Fix jquery conflicts on some websites
 
 == Version 3.2.3 ==
