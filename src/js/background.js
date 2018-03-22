@@ -51,6 +51,19 @@ var Background = {
 
         return url_data;
     },
+    urlDataBarNotClosed: function (data) {
+        var bar_closed = false;
+
+        if (!Utils.varIsUndefined(data)) {
+            bar_closed = Utils.varIsUndefined(data.bar_closed) || !data.bar_closed;
+        }
+
+        if (bar_closed) {
+            Utils.myConsoleLog('info', 'Ignoring bar on this page because it was closed', data);
+        }
+
+        return bar_closed;
+    },
     getSlugData: function (slug) {
         return Background.slugs_data[slug];
     },
@@ -100,7 +113,7 @@ var Background = {
         }
     },
     setUrlTab: function (tab_id, url) {
-        if (tab_id > 0) {
+        if (tab_id > 0 && Utils.varIsUndefined(Background.urls_tab[tab_id])) {
             Background.urls_tab[tab_id] = url;
         }
     },
@@ -336,11 +349,9 @@ Utils.getBrowserOrChromeVar().tabs.onUpdated.addListener(function (tab_id, chang
 
         // check for tab id data
         var tab_url = Background.urls_tab[tab_id];
-
         if (!Utils.varIsUndefined(tab_url)) {
             var data = Background.getUrlData(tab_url);
-
-            if (!Utils.varIsUndefined(data)) {
+            if (Background.urlDataBarNotClosed(data)) {
                 Utils.getBrowserOrChromeVar().tabs.sendMessage(
                         tab_id, {
                             action: `background_content_overlay_${!Utils.varIsUndefined(changeInfo.url) && !Background.options.persist_bar ? 'remove' : 'init'}`,
@@ -359,7 +370,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
     var tab = sender.tab;
 
     var valid_tab_url = !Utils.testRedditUrl(tab.url);
-    if (request.action === 'content_reddit_clicked') {
+    if (request.action === 'background_content_reddit_clicked') {
         // for this action the tab should be reddit
         valid_tab_url = !valid_tab_url;
     }
@@ -368,7 +379,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
         var $return = false;
 
         switch (request.action) {
-            case 'content_reddit_clicked':
+            case 'background_content_reddit_clicked':
                 var data = Background.getUrlData(request.data.url);
                 if (!Utils.varIsUndefined(data)) {
                     // set old values before overriding
@@ -379,26 +390,22 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                 Background.setUrlsData(request.data);
                 break;
 
-            case 'content_overlay_init':
+            case 'background_content_overlay_init':
                 Background.parentTabIsReddit(tab, function () {
-                    var data = Background.getUrlData(tab.url);
-                    if (data) {
-                        Background.setUrlTab(tab.id, tab.url);
+                    Background.setUrlTab(tab.id, tab.url);
 
-                        if (Utils.varIsUndefined(data.bar_closed) || !data.bar_closed) {
-                            sendResponse({
-                                slug: data.slug
-                            });
-                        } else {
-                            Utils.myConsoleLog('info', 'Ignoring bar on this page because it was closed', data);
-                        }
+                    var data = Background.getUrlData(tab.url);
+                    if (Background.urlDataBarNotClosed(data)) {
+                        sendResponse({
+                            slug: data.slug
+                        });
                     }
                 });
 
                 $return = true;
                 break;
 
-            case 'content_bar_init':
+            case 'background_content_bar_init':
                 var data = Background.getSlugData(request.slug);
                 if (data) {
                     sendResponse({
@@ -408,7 +415,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                 }
                 break;
 
-            case 'content_bar_action':
+            case 'background_content_bar_action':
                 BarTab.handleBarAction(request.subaction, request.data);
                 break;
 

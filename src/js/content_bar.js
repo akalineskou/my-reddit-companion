@@ -4,68 +4,25 @@ $(document).ready(function () {
     BarElements.init();
 
     Utils.myRuntimeSendMessage({
-        action: 'content_bar_init',
+        action: 'background_content_bar_init',
         slug: window.location.hash.substr(1) || ''
     }, function (response) {
         if (!Utils.varIsUndefined(response)) {
-            Utils.myConsoleLog('info', "'content_bar_init' response", response);
+            Utils.myConsoleLog('info', "'background_content_bar_init' response", response);
 
             Bar.initData(response.data, response.logged_in);
             Bar.initBar(function () {
                 Bar.initEvents();
 
-                Utils.postMessageToTopWindow({
-                    action: 'content_bar_init',
-                    height: BarElements.getBarHeight()
-                });
+                window.setTimeout(function () {
+                    Utils.postMessageToTopWindow({
+                        action: 'content_bar_init',
+                        bar_minimized: Bar.bar_minimized,
+                        height: BarElements.getBarHeight(),
+                        width: BarElements.getBarWidth()
+                    });
+                }, 50);
             });
-        }
-    });
-
-    $(window).on('message', function (event) {
-        event = event.originalEvent;
-        Utils.myConsoleLog('info', 'Message received from content_overlay parent', event);
-
-        var data = event.data;
-        if (!Utils.varIsUndefined(data)) {
-            switch (data.action) {
-                case 'content_overlay_show_maximize':
-                    $('body').addClass('transparent_background box_shadow_initial');
-
-                    BarElements.showMaximizeBar();
-
-                    Utils.postMessageToTopWindow({
-                        action: 'content_bar_show_maximize'
-                    });
-                    break;
-
-                case 'content_overlay_show_minimize':
-                    if (!Bar.options.transparent_background) {
-                        $('body').removeClass('transparent_background');
-                    }
-                    $('body').removeClass('box_shadow_initial');
-
-                    BarElements.showContentBar();
-
-                    $(window).resize(function () {
-                        Bar.windowResize(BarElements.getContentBarHeight());
-                    });
-
-                    Utils.postMessageToTopWindow({
-                        action: 'content_bar_show_minimize'
-                    });
-                    break;
-            }
-        }
-    });
-
-    Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
-        Utils.myConsoleLog('info', 'Incoming content_bar request', request, 'sender', sender);
-
-        switch (request.action) {
-            case 'background_options_changed':
-                Bar.initBar();
-                break;
         }
     });
 });
@@ -108,7 +65,10 @@ var Bar = {
 
         if (!Bar.bar_minimized) {
             $(window).resize(function () {
-                Bar.windowResize(BarElements.getBarHeight());
+                Utils.postMessageToTopWindow({
+                    action: 'content_bar_resize',
+                    height: BarElements.getBarHeight()
+                });
             });
         }
     },
@@ -201,13 +161,11 @@ var Bar = {
         Bar.setBarData();
     },
     actionClose: function () {
-        $(window).off('resize');
+        Bar.actionPostMessage('content_bar_close');
 
         Utils.postMessageToTopWindow({
             action: 'content_bar_close'
         });
-
-        Bar.actionPostMessage('content_bar_close');
     },
     actionSpam: function () {
         Bar.data.is_spammed = !Bar.data.is_spammed;
@@ -233,42 +191,24 @@ var Bar = {
         Bar.setBarData();
     },
     actionMinimize: function () {
-        $(window).off('resize');
-
-        BarElements.showMaximizeBar();
-        var height = BarElements.getMaximizeBarHeight();
-        BarElements.showContentBar();
-
-        Utils.postMessageToTopWindow({
-            action: 'content_bar_minimize',
-            height: height
-        });
-
-
         Bar.actionPostMessage('content_bar_minimize');
 
-        Bar.data.bar_minimized = !Bar.data.bar_minimized;
+        Utils.postMessageToTopWindow({
+            action: 'content_bar_reinit'
+        });
     },
     actionMaximize: function () {
-        Utils.postMessageToTopWindow({
-            action: 'content_bar_maximize'
-        });
-
         Bar.actionPostMessage('content_bar_maximize');
 
-        Bar.data.bar_minimized = !Bar.data.bar_minimized;
+        Utils.postMessageToTopWindow({
+            action: 'content_bar_reinit'
+        });
     },
     actionPostMessage: function (action) {
         Utils.myRuntimeSendMessage({
-            action: 'content_bar_action',
+            action: 'background_content_bar_action',
             subaction: action,
             data: Bar.data
-        });
-    },
-    windowResize: function (height) {
-        Utils.postMessageToTopWindow({
-            action: 'content_bar_resize',
-            height: height
         });
     }
 };
@@ -295,7 +235,6 @@ var BarElements = {
         BarElements.$minimize = BarElements.$content_bar.find('.content_minimize');
 
         BarElements.$maximize_bar = $('#maximize_bar');
-        BarElements.$maximize_right = BarElements.$maximize_bar.find('.content_maximize_right');
         BarElements.$maximize = BarElements.$maximize_bar.find('.content_maximize');
     },
     getContentBarHeight: function () {
@@ -306,6 +245,9 @@ var BarElements = {
     },
     getBarHeight: function () {
         return !Bar.bar_minimized ? BarElements.getContentBarHeight() : BarElements.getMaximizeBarHeight();
+    },
+    getBarWidth: function () {
+        return !Bar.bar_minimized ? '' : BarElements.$maximize.closest('div').width();
     },
     toggleBodyClasses: function () {
         $('body').toggleClass('light_theme', !Bar.options.dark_theme);
@@ -327,9 +269,6 @@ var BarElements = {
         BarElements.$content_bar.toggleClass('container', !Bar.options.fluid_container);
         BarElements.$content_bar.toggleClass('container-fluid', Bar.options.fluid_container);
         BarElements.$content_bar.find('.row').toggleClass('big_buttons', Bar.options.big_buttons);
-
-        BarElements.$maximize_bar.toggleClass('container', !Bar.options.fluid_container);
-        BarElements.$maximize_bar.toggleClass('container-fluid', Bar.options.fluid_container);
 
         if (!Bar.bar_minimized) {
             BarElements.showContentBar();
@@ -437,8 +376,6 @@ var BarElements = {
         }
     },
     setMaximizeData: function () {
-        BarElements.$maximize_right.toggleClass('display_none', Bar.options.maximize_location_left);
-
         BarElements.$maximize.closest('div').toggleClass('light_theme', !Bar.options.dark_theme && !Bar.options.transparent_background);
         BarElements.$maximize.closest('div').toggleClass('dark_theme', Bar.options.dark_theme && !Bar.options.transparent_background);
         BarElements.$maximize.closest('div').toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);

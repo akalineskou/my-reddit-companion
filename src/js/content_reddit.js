@@ -50,7 +50,7 @@ var Reddit = {
             Utils.myConsoleLog('info', 'Got data from thing', data);
 
             Utils.myRuntimeSendMessage({
-                action: 'content_reddit_clicked',
+                action: 'background_content_reddit_clicked',
                 data: data
             });
         }

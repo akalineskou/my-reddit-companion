@@ -9,12 +9,13 @@ iframe#content_bar_iframe {
     margin: 0;
 
     position: fixed;
-    left: 0;
-    right: 0;
 }
 iframe#content_bar_iframe.iframe_top {
     top: 0;
 }
 iframe#content_bar_iframe.iframe_bottom {
     bottom: 0;
+}
+iframe#content_bar_iframe.iframe_left {
+    left: 0;
 }
