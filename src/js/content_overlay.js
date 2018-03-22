@@ -1,6 +1,6 @@
 /* global Utils, Options, myjQuery */
 
-myjQuery(window).ready(function () {
+myjQuery(document).ready(function () {
     Options.getOptions(function (options) {
         IframeBar.options = options;
 
@@ -35,6 +35,7 @@ myjQuery(window).ready(function () {
                 switch (request.action) {
                     case 'content_bar_init':
                         IframeBar.bar_minimized = request.bar_minimized;
+                        IframeBar.bar_maximized_direction = request.bar_maximized_direction;
 
                         IframeBar.setIframeClasses();
                         IframeBar.showBar();
@@ -124,7 +125,12 @@ var IframeBar = {
             if (IframeBar.options.big_buttons) {
                 myjQuery(`#${IframeBar.iframe_id}`).css(IframeBar.options.bar_location_bottom ? 'bottom' : 'top', offset_pixels);
             }
-            myjQuery(`#${IframeBar.iframe_id}`).css(IframeBar.options.maximize_location_left ? 'left' : 'right', offset_pixels);
+
+            var position = IframeBar.options.maximize_location_left ? 'left' : 'right';
+            if (IframeBar.bar_maximized_direction) {
+                position = position === 'left' ? 'right' : 'left';
+            }
+            myjQuery(`#${IframeBar.iframe_id}`).css(position, offset_pixels);
         }
 
         myjQuery(`#${IframeBar.iframe_id}`).slideDown(IframeBar.slide_animation);

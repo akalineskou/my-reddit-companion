@@ -346,6 +346,10 @@ var BarTab = {
             case 'content_bar_maximize':
                 url_data.bar_minimized = false;
                 break;
+
+            case 'content_bar_maximized_direction':
+                url_data.bar_maximized_direction = !url_data.bar_maximized_direction;
+                break;
         }
 
         if (valid_data) {
@@ -432,6 +436,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                     // set old values before overriding
                     request.data.bar_closed = data.bar_closed;
                     request.data.bar_minimized = data.bar_minimized;
+                    request.data.bar_maximized_direction = data.bar_maximized_direction;
                 }
 
                 Background.setUrlsData(request.data);

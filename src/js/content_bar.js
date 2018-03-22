@@ -18,6 +18,7 @@ myjQuery(document).ready(function () {
                     Utils.postMessageToTopWindow({
                         action: 'content_bar_init',
                         bar_minimized: Bar.bar_minimized,
+                        bar_maximized_direction: Bar.data.bar_maximized_direction,
                         height: BarElements.getBarHeight(),
                         width: BarElements.getBarWidth()
                     });
@@ -61,6 +62,11 @@ var Bar = {
         });
         BarElements.$maximize.click(function () {
             Bar.actionMaximize();
+        });
+        BarElements.$maximize.contextmenu(function (event) {
+            event.preventDefault();
+
+            Bar.actionMaximizeDirection();
         });
 
         if (!Bar.bar_minimized) {
@@ -199,6 +205,13 @@ var Bar = {
     },
     actionMaximize: function () {
         Bar.actionPostMessage('content_bar_maximize');
+
+        Utils.postMessageToTopWindow({
+            action: 'content_bar_reinit'
+        });
+    },
+    actionMaximizeDirection: function () {
+        Bar.actionPostMessage('content_bar_maximized_direction');
 
         Utils.postMessageToTopWindow({
             action: 'content_bar_reinit'
