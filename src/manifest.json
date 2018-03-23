@@ -2,7 +2,7 @@
     "name": "My Reddit Companion",
     "version": "3.3.0",
     "manifest_version": 2,
-    "description": "Best Reddit Companion on the web",
+    "description": "My Reddit Companion integrates Reddit into the browser. After opening a link (mouse/keyboard) it shows a bar with info and actions.",
     "homepage_url": "https://github.com/alex2005git/my-reddit-companion",
     "permissions": [
         "tabs",
