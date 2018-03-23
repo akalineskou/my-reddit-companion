@@ -4,6 +4,7 @@ var Background = {
     app_name: 'my_reddit_companion',
     logged_out_interval_delay: 1000 * 60 * 1, // when logged out check every 1 minute
     logged_in_interval_delay: 1000 * 60 * 10, // when logged in check every 10 minutes
+    unread_messages_delay: 1000 * 60 * 2, // check every 2 minutes
     garbage_collection_delay: 1000 * 60 * 5, // check every 5 minutes
     garbage_collection_check: 1000 * 60 * 60, // delete when last_updated is more than 60 minutes
     init: function () {
@@ -18,6 +19,7 @@ var Background = {
         Background.urls_redirected = {};
         Background.urls_tab = {};
         Background.slugs_data = {};
+        Background.unread_messages_data = {};
     },
     setUrlsData: function (data) {
         if (!data.is_self) {
@@ -197,12 +199,16 @@ var Background = {
 
         if (!Utils.varIsUndefined(Background.login_check_interval)) {
             window.clearInterval(Background.login_check_interval);
+
+            delete Background.login_check_interval;
         }
 
         Background.redditApiRequest('me.json', {}, 'GET', function (response) {
             if (response && response.data) {
                 Background.setLoggedInHash(response.data.modhash);
             }
+
+            Background.initMessageNotifications(true);
 
             Background.loginCheckInterval(Background.isLoggedIn());
         }, function () {
@@ -221,31 +227,37 @@ var Background = {
             Background.redditApiRequest(action, data);
         }
     },
-    redditApiRequest: function (action, data, method = 'POST', callback_success, callback_error) {
+    redditRequest: function (path, action, data, method = 'POST', callback_success, callback_error) {
         data.app = Background.app_name;
 
-        Utils.myConsoleLog('info', `Sending API action '${action}' with data`, data);
+        Utils.myConsoleLog('info', `Sending '${path}' action '${action}' with data`, data);
 
         myjQuery.ajax({
-            url: `${Utils.redditUrl()}/api/${action}`,
+            url: `${Utils.redditUrl()}/${path}/${action}`,
             type: method,
             dataType: 'json',
             data: data,
             success: function (response) {
-                Utils.myConsoleLog('info', `Received API response from action '${action}'`, response);
+                Utils.myConsoleLog('info', `Received '${path}' response from action '${action}'`, response);
 
                 if (Utils.varIsFunction(callback_success)) {
                     callback_success(response);
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                Utils.myConsoleLog('error', `Received API error from action '${action}'`, xhr, ajaxOptions, thrownError);
+                Utils.myConsoleLog('error', `Received '${path}' error from action '${action}'`, xhr, ajaxOptions, thrownError);
 
                 if (Utils.varIsFunction(callback_error)) {
                     callback_error();
                 }
             }
         });
+    },
+    redditApiRequest: function (action, data, method = 'POST', callback_success, callback_error) {
+        Background.redditRequest('api', action, data, method, callback_success, callback_error);
+    },
+    redditMessageRequest: function (action, data, method = 'POST', callback_success, callback_error) {
+        Background.redditRequest('message', action, data, method, callback_success, callback_error);
     },
     parentTabIsReddit: function (tab, callback) {
         var opener_tab_id = tab.openerTabId;
@@ -269,14 +281,129 @@ var Background = {
         Background.deleteUrlsData();
         Background.deleteUrlsRedirected();
         Background.deleteUrlsTab();
+        Background.deleteUnreadMessagesData();
     },
     garbageCollectionInterval: function () {
         window.setInterval(Background.garbageCollectionCheck, Background.garbage_collection_delay);
     },
-    initOptions: function () {
+    initOptions: function (callback) {
         Options.getOptions(function (options) {
             Background.options = options;
+
+            Background.initMessageNotifications();
+
+            if (Utils.varIsFunction(callback)) {
+                callback();
+            }
         });
+    },
+    initMessageNotifications: function (force_clear = false) {
+        if (Background.options.disable_unread_messages || force_clear) {
+            window.clearInterval(Background.unread_messages_interval);
+
+            delete Background.unread_messages_interval;
+        }
+
+        Background.unreadMessagesCheckInterval();
+    },
+    unreadMessagesCheck: function () {
+        if (Background.isLoggedIn()) {
+            Background.redditMessageRequest('unread.json', {}, 'GET', function (response) {
+                if (response && response.data && response.data.children) {
+                    for (var child_index in response.data.children) {
+                        Background.setUnreadMessagesData(response.data.children[child_index].data);
+                    }
+
+                    Background.unreadMessagesShowNotification();
+                }
+            });
+        }
+    },
+    unreadMessagesCheckInterval: function () {
+        if (!Background.options.disable_unread_messages && Utils.varIsUndefined(Background.unread_messages_interval)) {
+            Background.unreadMessagesCheck();
+
+            Background.unread_messages_interval = window.setInterval(Background.unreadMessagesCheck, Background.unread_messages_delay);
+        }
+    },
+    unreadMessagesShowNotification: function () {
+        var unread_messages_data = Background.getUnreadMessagesData();
+        var messages_count = unread_messages_data.length;
+
+        if (messages_count > 0) {
+            var notification_title;
+            var notification_message = [];
+
+            if (messages_count === 1) {
+                notification_title = 'New Reddit message';
+
+                notification_message.push(`Author: ${unread_messages_data[0].from}`);
+                notification_message.push(`Subject: ${unread_messages_data[0].subject}`);
+                notification_message.push(`Message: ${unread_messages_data[0].message}`);
+            } else {
+                var froms = [];
+                var subjects = [];
+
+                var unread_message_data;
+                for (var message_id in Background.unread_messages_data) {
+                    unread_message_data = Background.unread_messages_data[message_id];
+
+                    froms.push(unread_message_data.from);
+                    subjects.push(unread_message_data.subject);
+                }
+
+                notification_title = `New Reddit messages (${messages_count})`;
+
+                notification_message.push(`Authors: ${Utils.uniqueArray(froms).join(', ')}`);
+                notification_message.push(`Subjects: ${subjects.join(', ')}`);
+            }
+
+            Utils.myNotificationCreate(notification_title, notification_message.join('\n'));
+        }
+    },
+    setUnreadMessagesData: function (child_data) {
+        var message_id = child_data.id;
+
+        if (Utils.varIsUndefined(Background.unread_messages_data[message_id])) {
+            Background.unread_messages_data[message_id] = {
+                from: child_data.author,
+                subject: child_data.subject,
+                message: child_data.body,
+                is_comment: child_data.was_comment,
+                notified: false,
+                last_updated: Date.now()
+            };
+        } else {
+            Background.unread_messages_data[message_id].last_updated = Date.now();
+        }
+    },
+    getUnreadMessagesData: function () {
+        var unread_messages_data = [];
+
+        var unread_message_data;
+        for (var message_id in Background.unread_messages_data) {
+            unread_message_data = Background.unread_messages_data[message_id];
+
+            if (!unread_message_data.notified) {
+                unread_message_data.notified = true;
+
+                unread_messages_data.push(unread_message_data);
+            }
+        }
+
+        return unread_messages_data;
+    },
+    deleteUnreadMessagesData: function () {
+        var unread_message_data;
+        for (var message_id in Background.unread_messages_data) {
+            unread_message_data = Background.unread_messages_data[message_id];
+
+            if (Date.now() - unread_message_data.last_updated > Background.garbage_collection_check) {
+                Utils.myConsoleLog('info', `Deleted unread_messages_data for message_id '${message_id}'`);
+
+                delete Background.unread_messages_data[message_id];
+            }
+        }
     }
 };
 
@@ -415,6 +542,15 @@ Utils.getBrowserOrChromeVar().tabs.onUpdated.addListener(function (tab_id, chang
             }
         }
     }
+});
+
+// set notification on click listener
+Utils.getBrowserOrChromeVar().notifications.onClicked.addListener(function () {
+    Utils.myNotificationClear();
+
+    Utils.getBrowserOrChromeVar().tabs.create({
+        url: `${Utils.redditUrl()}/message/unread`
+    });
 });
 
 // listen for contact scripts messages

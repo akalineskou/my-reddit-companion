@@ -91,5 +91,29 @@ var Utils = {
         });
 
         return result;
+    },
+    myNotificationCreate: function (title, message) {
+        if (!Utils.varIsUndefined(title) && !Utils.varIsUndefined(message)) {
+            var notification_data = {
+                type: 'basic',
+                iconUrl: Utils.getBrowserOrChromeVar().extension.getURL('../images/reddit-48.png'),
+                title: title,
+                message: message
+            };
+
+            Utils.myConsoleLog('info', 'Creating notification with data', notification_data);
+
+            Utils.getBrowserOrChromeVar().notifications.create('my-reddit-companion-notification', notification_data);
+        } else {
+            Utils.myConsoleLog('error', `'myCreateNotification' undefined variables either title '${title}' or message '${message}'`);
+        }
+    },
+    myNotificationClear: function () {
+        Utils.myConsoleLog('info', 'myNotificationClear');
+
+        Utils.getBrowserOrChromeVar().notifications.clear('my-reddit-companion-notification');
+    },
+    uniqueArray: function (array) {
+        return [...new Set(array)];
     }
 };
