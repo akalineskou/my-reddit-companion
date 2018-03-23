@@ -2,13 +2,16 @@
 
 var Reddit = {
     init: function () {
-        myjQuery(document).on('mousedown', 'a', Reddit.redditLinkClicked);
-        myjQuery(document).on('keydown', Reddit.redditLinkKeyed);
+        myjQuery(document)
+                .on('mousedown', 'a', function () {
+                    Reddit.redditLinkClicked(myjQuery(this));
+                })
+                .on('keydown', Reddit.redditLinkKeyed);
     },
-    redditLinkClicked: function (event) {
-        var $target_element = myjQuery(event.target);
+    redditLinkClicked: function ($this) {
+        var $target_element = myjQuery($this);
 
-        // check element is a link and has title class
+        // check element is a link
         if (!Utils.elementIsAnchorTag($target_element)) {
             Utils.myConsoleLog('info', 'Target element is not a link', $target_element);
 
@@ -25,12 +28,13 @@ var Reddit = {
 
         Reddit.sendDataToBackground($thing);
     },
-    redditLinkKeyed: function (event) {
-        var $target_element = myjQuery(event.target);
+    redditLinkKeyed: function () {
+        var $this = myjQuery(this);
+        var $target_element = myjQuery($this);
 
         if (Utils.elementIsAnchorTag($target_element)) {
             // element is an anchor tag
-            Reddit.redditLinkClicked(event);
+            Reddit.redditLinkClicked($this);
         } else {
             // it was res shortcut
             var $thing = $target_element.find('.thing.res-selected');
