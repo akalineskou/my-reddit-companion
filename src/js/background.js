@@ -56,7 +56,7 @@ var Background = {
         return url_data;
     },
     urlDataBarClosed: function (data) {
-        var bar_closed = false;
+        var bar_closed = true;
 
         if (!Utils.varIsUndefined(data)) {
             bar_closed = !Utils.varIsUndefined(data.bar_closed) && data.bar_closed;
@@ -157,13 +157,16 @@ var Background = {
         }
     },
     getUrlTab: function (tab_id) {
-        var tab_url_data = Background.urls_tab[tab_id];
+        var url;
 
+        var tab_url_data = Background.urls_tab[tab_id];
         if (!Utils.varIsUndefined(tab_url_data)) {
+            url = tab_url_data.url;
+
             tab_url_data.last_updated = Date.now();
         }
 
-        return tab_url_data.url;
+        return url;
     },
     deleteUrlsTab: function () {
         var tab_url_data;
@@ -420,12 +423,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
 
     var tab = sender.tab;
 
-    var valid_tab_url = !Utils.testRedditUrl(tab.url);
-    if (request.action === 'background_content_reddit_clicked') {
-        // for this action the tab should be reddit
-        valid_tab_url = !valid_tab_url;
-    }
-
+    var valid_tab_url = request.action === 'background_content_reddit_clicked' ? Utils.testRedditUrl(tab.url) : true;
     if (valid_tab_url) {
         var $return = false;
 
@@ -459,7 +457,8 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
 
             case 'background_content_bar_init':
                 var data = Background.getSlugData(request.slug);
-                if (data) {
+                if (!Utils.varIsUndefined(data) && tab.url.indexOf(data.permalink) === -1) {
+                    // send response if data is valid and tab url is not reddit permalink
                     sendResponse({
                         data: data,
                         logged_in: Background.isLoggedIn()
