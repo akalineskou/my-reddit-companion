@@ -50,7 +50,7 @@ var Reddit = {
     sendDataToBackground: function ($thing) {
         // get data from thing element
         var data = Reddit.getThingData($thing);
-        if (data) {
+        if (data && !Utils.varIsUndefined(data.url)) {
             Utils.myConsoleLog('info', 'Got data from thing', data);
 
             Utils.myRuntimeSendMessage({

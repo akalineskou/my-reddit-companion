@@ -62,10 +62,10 @@ var Background = {
 
         if (!Utils.varIsUndefined(data)) {
             bar_closed = !Utils.varIsUndefined(data.bar_closed) && data.bar_closed;
-        }
 
-        if (bar_closed) {
-            Utils.myConsoleLog('info', 'Ignoring bar on this page because it was closed', data);
+            if (bar_closed) {
+                Utils.myConsoleLog('info', 'Ignoring bar on this page because it was closed', data);
+            }
         }
 
         return bar_closed;
@@ -99,7 +99,7 @@ var Background = {
             }
         }
 
-        if (url_redirected !== url_original) {
+        if (Utils.normalizeUrl(url_redirected) !== Utils.normalizeUrl(url_original)) {
             Utils.myConsoleLog('info', `Mapped redirected url '${url_redirected}' to original url '${url_original}'`);
 
             var url_original_data = {
@@ -117,6 +117,7 @@ var Background = {
             url: url
         };
 
+        var i = 0;
         do {
             original_url_data = Background.urls_redirected[original_url_data.url];
 
@@ -125,7 +126,15 @@ var Background = {
 
                 original_url_data.last_updated = Date.now();
             }
-        } while (!Utils.varIsUndefined(original_url_data));
+
+            Utils.myConsoleLog('info', `Ran 'getOriginalUrlFromRedirected' original_url_data`, original_url_data);
+
+            i++;
+        } while (!Utils.varIsUndefined(original_url_data) && i < 10);
+
+        if (i === 10) {
+            Utils.myConsoleLog('error', `'getOriginalUrlFromRedirected' ran more than 10 times for url '${url}'`);
+        }
 
         return original_url;
     },
