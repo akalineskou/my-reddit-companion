@@ -115,5 +115,8 @@ var Utils = {
     },
     uniqueArray: function (array) {
         return [...new Set(array)];
+    },
+    checkPositionIsLeft: function (maximize_location_left, bar_maximized_direction) {
+        return !bar_maximized_direction ? maximize_location_left : !maximize_location_left;
     }
 };

@@ -31,6 +31,12 @@ a:hover {
 .box_shadow_initial {
     box-shadow: initial;
 }
+.margin_left {
+    margin-left: 5px;
+}
+.margin_right {
+    margin-right: 5px;
+}
 
 /* content bar styles */
 .container-fluid {

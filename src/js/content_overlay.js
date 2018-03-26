@@ -126,11 +126,8 @@ var IframeBar = {
                 myjQuery(`#${IframeBar.iframe_id}`).css(IframeBar.options.bar_location_bottom ? 'bottom' : 'top', offset_pixels);
             }
 
-            var position = IframeBar.options.maximize_location_left ? 'left' : 'right';
-            if (IframeBar.bar_maximized_direction) {
-                position = position === 'left' ? 'right' : 'left';
-            }
-            myjQuery(`#${IframeBar.iframe_id}`).css(position, offset_pixels);
+            var position_is_left = Utils.checkPositionIsLeft(IframeBar.options.maximize_location_left, IframeBar.bar_maximized_direction);
+            myjQuery(`#${IframeBar.iframe_id}`).css(position_is_left ? 'left' : 'right', offset_pixels);
         }
 
         myjQuery(`#${IframeBar.iframe_id}`).slideDown(IframeBar.slide_animation);

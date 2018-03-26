@@ -1,3 +1,6 @@
+== Version 3.3.2 ==
+* Add comments button when bar is minimized
+
 == Version 3.3.1 ==
 * Fix infinite loop when checking for redirects + small bug fixes
 

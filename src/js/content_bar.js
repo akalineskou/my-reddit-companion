@@ -34,36 +34,36 @@ var Bar = {
         Bar.logged_in = logged_in;
     },
     initEvents: function () {
-        BarElements.$upvote.click(function () {
+        BarElements.content_bar.$upvote.click(function () {
             Bar.actionUpvote();
         });
-        BarElements.$downvote.click(function () {
+        BarElements.content_bar.$downvote.click(function () {
             Bar.actionDownvote();
         });
-        BarElements.$save.click(function () {
+        BarElements.content_bar.$save.click(function () {
             Bar.actionSave();
         });
-        BarElements.$close.click(function () {
+        BarElements.content_bar.$close.click(function () {
             Bar.actionClose();
         });
 
-        BarElements.$spam.click(function () {
+        BarElements.content_bar.$spam.click(function () {
             Bar.actionSpam();
         });
-        BarElements.$remove.click(function () {
+        BarElements.content_bar.$remove.click(function () {
             Bar.actionRemove();
         });
-        BarElements.$approve.click(function () {
+        BarElements.content_bar.$approve.click(function () {
             Bar.actionApprove();
         });
 
-        BarElements.$minimize.click(function () {
+        BarElements.content_bar.$minimize.click(function () {
             Bar.actionMinimize();
         });
-        BarElements.$maximize.click(function () {
+        BarElements.maximize_bar.$maximize.click(function () {
             Bar.actionMaximize();
         });
-        BarElements.$maximize.contextmenu(function (event) {
+        BarElements.maximize_bar.$maximize.contextmenu(function (event) {
             event.preventDefault();
 
             Bar.actionMaximizeDirection();
@@ -228,27 +228,33 @@ var Bar = {
 
 var BarElements = {
     init: function () {
-        BarElements.$content_bar = myjQuery('#content_bar');
-        BarElements.$logo = BarElements.$content_bar.find('.content_logo');
-        BarElements.$logo_label = BarElements.$content_bar.find('.content_logo_label');
-        BarElements.$score = BarElements.$content_bar.find('.content_score');
-        BarElements.$title = BarElements.$content_bar.find('.content_title');
-        BarElements.$subreddit = BarElements.$content_bar.find('.content_subreddit');
-        BarElements.$upvote = BarElements.$content_bar.find('.content_upvote');
-        BarElements.$downvote = BarElements.$content_bar.find('.content_downvote');
-        BarElements.$comments = BarElements.$content_bar.find('.content_comments');
-        BarElements.$save = BarElements.$content_bar.find('.content_save');
-        BarElements.$login = BarElements.$content_bar.find('.content_login');
+        BarElements.$body = myjQuery('body');
+        BarElements.$content_bar = BarElements.$body.find('#content_bar');
+        BarElements.$maximize_bar = BarElements.$body.find('#maximize_bar');
 
-        BarElements.$spam = BarElements.$content_bar.find('.content_spam');
-        BarElements.$remove = BarElements.$content_bar.find('.content_remove');
-        BarElements.$approve = BarElements.$content_bar.find('.content_approve');
+        BarElements.content_bar = {};
+        BarElements.maximize_bar = {};
 
-        BarElements.$close = BarElements.$content_bar.find('.content_close');
-        BarElements.$minimize = BarElements.$content_bar.find('.content_minimize');
+        BarElements.content_bar.$logo = BarElements.$content_bar.find('.content_logo');
+        BarElements.content_bar.$logo_label = BarElements.$content_bar.find('.content_logo_label');
+        BarElements.content_bar.$score = BarElements.$content_bar.find('.content_score');
+        BarElements.content_bar.$title = BarElements.$content_bar.find('.content_title');
+        BarElements.content_bar.$subreddit = BarElements.$content_bar.find('.content_subreddit');
+        BarElements.content_bar.$upvote = BarElements.$content_bar.find('.content_upvote');
+        BarElements.content_bar.$downvote = BarElements.$content_bar.find('.content_downvote');
+        BarElements.content_bar.$comments = BarElements.$content_bar.find('.content_comments');
+        BarElements.content_bar.$save = BarElements.$content_bar.find('.content_save');
+        BarElements.content_bar.$login = BarElements.$content_bar.find('.content_login');
+        BarElements.content_bar.$spam = BarElements.$content_bar.find('.content_spam');
+        BarElements.content_bar.$remove = BarElements.$content_bar.find('.content_remove');
+        BarElements.content_bar.$approve = BarElements.$content_bar.find('.content_approve');
+        BarElements.content_bar.$close = BarElements.$content_bar.find('.content_close');
+        BarElements.content_bar.$minimize = BarElements.$content_bar.find('.content_minimize');
 
-        BarElements.$maximize_bar = myjQuery('#maximize_bar');
-        BarElements.$maximize = BarElements.$maximize_bar.find('.content_maximize');
+        BarElements.maximize_bar.$maximize = BarElements.$maximize_bar.find('.content_maximize');
+        BarElements.maximize_bar.$comments = BarElements.$maximize_bar.find('.content_comments');
+        BarElements.maximize_bar.$comments_left = BarElements.maximize_bar.$comments.eq(0);
+        BarElements.maximize_bar.$comments_right = BarElements.maximize_bar.$comments.eq(1);
     },
     getContentBarHeight: function () {
         return BarElements.$content_bar.height();
@@ -260,15 +266,15 @@ var BarElements = {
         return !Bar.bar_minimized ? BarElements.getContentBarHeight() : BarElements.getMaximizeBarHeight();
     },
     getBarWidth: function () {
-        return !Bar.bar_minimized ? '' : BarElements.$maximize.closest('div').width();
+        return !Bar.bar_minimized ? '' : BarElements.maximize_bar.$maximize.closest('div').outerWidth(true) + BarElements.maximize_bar.$comments.closest('div').not('.display_none').outerWidth(true) + 1 + (Bar.options.big_buttons ? 1 : 0);
     },
     toggleBodyClasses: function () {
-        myjQuery('body').toggleClass('light_theme', !Bar.options.dark_theme);
-        myjQuery('body').toggleClass('dark_theme', Bar.options.dark_theme);
-        myjQuery('body').toggleClass('transparent_background', Bar.options.transparent_background || Bar.bar_minimized);
-        myjQuery('body').toggleClass('box_shadow_bottom', !Bar.options.disable_shadow && !Bar.options.bar_location_bottom);
-        myjQuery('body').toggleClass('box_shadow_top', !Bar.options.disable_shadow && Bar.options.bar_location_bottom);
-        myjQuery('body').toggleClass('box_shadow_initial', Bar.options.disable_shadow || Bar.bar_minimized);
+        BarElements.$body.toggleClass('light_theme', !Bar.options.dark_theme);
+        BarElements.$body.toggleClass('dark_theme', Bar.options.dark_theme);
+        BarElements.$body.toggleClass('transparent_background', Bar.options.transparent_background || Bar.bar_minimized);
+        BarElements.$body.toggleClass('box_shadow_bottom', !Bar.options.disable_shadow && !Bar.options.bar_location_bottom);
+        BarElements.$body.toggleClass('box_shadow_top', !Bar.options.disable_shadow && Bar.options.bar_location_bottom);
+        BarElements.$body.toggleClass('box_shadow_initial', Bar.options.disable_shadow || Bar.bar_minimized);
     },
     showContentBar: function () {
         BarElements.$content_bar.removeClass('display_none');
@@ -290,113 +296,131 @@ var BarElements = {
         }
     },
     setLogoData: function () {
-        BarElements.$logo.prop('title', 'Return to reddit');
-        BarElements.$logo.prop('href', Utils.redditUrl());
+        BarElements.content_bar.$logo.prop('title', 'Return to reddit');
+        BarElements.content_bar.$logo.prop('href', Utils.redditUrl());
 
-        BarElements.$logo.find('img').prop('alt', 'Reddit logo');
+        BarElements.content_bar.$logo.find('img').prop('alt', 'Reddit logo');
     },
     setLogoLabelData: function () {
-        BarElements.$logo_label.closest('div').toggleClass('display_none', Bar.options.hide_reddit);
+        BarElements.content_bar.$logo_label.closest('div').toggleClass('display_none', Bar.options.hide_reddit);
 
-        BarElements.$logo_label.text('reddit');
-        BarElements.$logo_label.prop('title', 'Return to reddit');
-        BarElements.$logo_label.prop('href', Utils.redditUrl());
+        BarElements.content_bar.$logo_label.text('reddit');
+        BarElements.content_bar.$logo_label.prop('title', 'Return to reddit');
+        BarElements.content_bar.$logo_label.prop('href', Utils.redditUrl());
     },
     setScoreData: function (score, likes, dislikes) {
-        BarElements.$score.closest('div').toggleClass('display_none', Bar.options.hide_score);
+        BarElements.content_bar.$score.closest('div').toggleClass('display_none', Bar.options.hide_score);
 
-        BarElements.$score.text(score);
-        BarElements.$score.toggleClass('btn-outline-secondary', !likes && !dislikes);
-        BarElements.$score.toggleClass('btn-outline-warning', likes || false);
-        BarElements.$score.toggleClass('btn-outline-primary', dislikes || false);
-        BarElements.$score.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$score.text(score);
+        BarElements.content_bar.$score.toggleClass('btn-outline-secondary', !likes && !dislikes);
+        BarElements.content_bar.$score.toggleClass('btn-outline-warning', likes || false);
+        BarElements.content_bar.$score.toggleClass('btn-outline-primary', dislikes || false);
+        BarElements.content_bar.$score.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setTitleData: function (title, href) {
-        BarElements.$title.text(title);
-        BarElements.$title.prop('title', title);
-        BarElements.$title.prop('href', href);
+        BarElements.content_bar.$title.text(title);
+        BarElements.content_bar.$title.prop('title', title);
+        BarElements.content_bar.$title.prop('href', href);
     },
     setSubredditData: function (subreddit) {
-        BarElements.$subreddit.closest('div').toggleClass('display_none', Bar.options.hide_subreddit);
+        BarElements.content_bar.$subreddit.closest('div').toggleClass('display_none', Bar.options.hide_subreddit);
 
-        BarElements.$subreddit.text(subreddit);
-        BarElements.$subreddit.prop('href', `${Utils.redditUrl()}/${subreddit}`);
-        BarElements.$subreddit.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$subreddit.text(subreddit);
+        BarElements.content_bar.$subreddit.prop('href', `${Utils.redditUrl()}/${subreddit}`);
+        BarElements.content_bar.$subreddit.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setLoginData: function () {
-        BarElements.$login.closest('div').toggleClass('display_none', Bar.logged_in);
-        BarElements.$login.find('span').toggleClass('display_none', Bar.options.hide_labels);
+        BarElements.content_bar.$login.closest('div').toggleClass('display_none', Bar.logged_in);
+        BarElements.content_bar.$login.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
-        BarElements.$login.prop('href', `${Utils.redditUrl()}/login`);
-        BarElements.$login.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$login.prop('href', `${Utils.redditUrl()}/login`);
+        BarElements.content_bar.$login.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setUpvoteData: function (likes) {
-        BarElements.$upvote.closest('div').toggleClass('display_none', !Bar.logged_in);
-        BarElements.$upvote.find('span').toggleClass('display_none', Bar.options.hide_labels);
+        BarElements.content_bar.$upvote.closest('div').toggleClass('display_none', !Bar.logged_in);
+        BarElements.content_bar.$upvote.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
-        BarElements.$upvote.toggleClass('active', likes || false);
-        BarElements.$upvote.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$upvote.toggleClass('active', likes || false);
+        BarElements.content_bar.$upvote.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setDownvoteData: function (dislikes) {
-        BarElements.$downvote.closest('div').toggleClass('display_none', !Bar.logged_in);
-        BarElements.$downvote.find('span').toggleClass('display_none', Bar.options.hide_labels);
+        BarElements.content_bar.$downvote.closest('div').toggleClass('display_none', !Bar.logged_in);
+        BarElements.content_bar.$downvote.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
-        BarElements.$downvote.toggleClass('active', dislikes || false);
-        BarElements.$downvote.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$downvote.toggleClass('active', dislikes || false);
+        BarElements.content_bar.$downvote.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setCommentsData: function (num_comments, href) {
-        BarElements.$comments.closest('div').toggleClass('display_none', Bar.options.hide_comments);
+        BarElements.content_bar.$comments.closest('div').toggleClass('display_none', Bar.options.hide_comments);
 
-        BarElements.$comments.find('span').text(num_comments);
-        BarElements.$comments.prop('href', href);
-        BarElements.$comments.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$comments.find('span').text(num_comments);
+        BarElements.content_bar.$comments.prop('href', href);
+        BarElements.content_bar.$comments.toggleClass('btn-sm', !Bar.options.big_buttons);
+
+        BarElements.maximize_bar.$comments.find('span').text(num_comments);
+        BarElements.maximize_bar.$comments.prop('href', href);
+        BarElements.maximize_bar.$comments.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setSaveData: function (saved) {
-        BarElements.$save.closest('div').toggleClass('display_none', Bar.options.hide_save || !Bar.logged_in);
-        BarElements.$save.find('span').toggleClass('display_none', Bar.options.hide_labels);
+        BarElements.content_bar.$save.closest('div').toggleClass('display_none', Bar.options.hide_save || !Bar.logged_in);
+        BarElements.content_bar.$save.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
-        BarElements.$save.toggleClass('active', saved);
-        BarElements.$save.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$save.toggleClass('active', saved);
+        BarElements.content_bar.$save.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setSpamData: function () {
-        BarElements.$spam.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || Bar.data.is_spammed || Bar.options.hide_mod_icons);
-        BarElements.$spam.find('span').toggleClass('display_none', Bar.options.hide_labels);
+        BarElements.content_bar.$spam.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || Bar.data.is_spammed || Bar.options.hide_mod_icons);
+        BarElements.content_bar.$spam.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
-        BarElements.$spam.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$spam.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setRemoveData: function () {
-        BarElements.$remove.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || Bar.data.is_spammed || Bar.options.hide_mod_icons);
-        BarElements.$remove.find('span').toggleClass('display_none', Bar.options.hide_labels);
+        BarElements.content_bar.$remove.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || Bar.data.is_spammed || Bar.options.hide_mod_icons);
+        BarElements.content_bar.$remove.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
-        BarElements.$remove.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$remove.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setApproveData: function () {
-        BarElements.$approve.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || (!Bar.data.is_spammed && Bar.data.to_approve === null) || Bar.options.hide_mod_icons);
-        BarElements.$approve.find('span').toggleClass('display_none', Bar.options.hide_labels);
+        BarElements.content_bar.$approve.closest('div').toggleClass('display_none', !Bar.logged_in || !Bar.data.is_mod || (!Bar.data.is_spammed && Bar.data.to_approve === null) || Bar.options.hide_mod_icons);
+        BarElements.content_bar.$approve.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
-        BarElements.$approve.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$approve.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setCloseData: function () {
-        BarElements.$close.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$close.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setMinimizeData: function () {
-        BarElements.$minimize.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.content_bar.$minimize.toggleClass('btn-sm', !Bar.options.big_buttons);
 
         if (Bar.options.bar_location_bottom) {
-            BarElements.$minimize.html(BarElements.$minimize.data('minimize_down'));
+            BarElements.content_bar.$minimize.html(BarElements.content_bar.$minimize.data('minimize_down'));
         } else {
-            BarElements.$minimize.html(BarElements.$minimize.data('minimize_up'));
+            BarElements.content_bar.$minimize.html(BarElements.content_bar.$minimize.data('minimize_up'));
         }
     },
     setMaximizeData: function () {
-        BarElements.$maximize.closest('div').toggleClass('light_theme', !Bar.options.dark_theme && !Bar.options.transparent_background);
-        BarElements.$maximize.closest('div').toggleClass('dark_theme', Bar.options.dark_theme && !Bar.options.transparent_background);
-        BarElements.$maximize.closest('div').toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);
+        BarElements.maximize_bar.$maximize.closest('div').toggleClass('light_theme', !Bar.options.dark_theme && !Bar.options.transparent_background);
+        BarElements.maximize_bar.$maximize.closest('div').toggleClass('dark_theme', Bar.options.dark_theme && !Bar.options.transparent_background);
+        BarElements.maximize_bar.$maximize.closest('div').toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);
 
-        BarElements.$maximize.toggleClass('btn-sm', !Bar.options.big_buttons);
+        BarElements.maximize_bar.$maximize.toggleClass('btn-sm', !Bar.options.big_buttons);
+
+        BarElements.maximize_bar.$comments.closest('div').toggleClass('light_theme', !Bar.options.dark_theme && !Bar.options.transparent_background);
+        BarElements.maximize_bar.$comments.closest('div').toggleClass('dark_theme', Bar.options.dark_theme && !Bar.options.transparent_background);
+        BarElements.maximize_bar.$comments.closest('div').toggleClass('content_maximize_transparent_fix', !Bar.options.transparent_background);
+
+        BarElements.maximize_bar.$comments.toggleClass('btn-sm', !Bar.options.big_buttons);
+
+        var position_is_left = Utils.checkPositionIsLeft(Bar.options.maximize_location_left, Bar.data.bar_maximized_direction);
+
+        BarElements.maximize_bar.$comments_left.closest('div').toggleClass('display_none', position_is_left);
+        BarElements.maximize_bar.$comments_right.closest('div').toggleClass('display_none', !position_is_left);
+
+        BarElements.maximize_bar.$comments_left.closest('div').toggleClass('margin_right', !position_is_left);
+        BarElements.maximize_bar.$comments_right.closest('div').toggleClass('margin_left', position_is_left);
     },
     setLinksParent: function () {
-        BarElements.$content_bar.find('a').each(function () {
+        BarElements.$body.find('a').each(function () {
             myjQuery(this).attr('target', '_top');
         });
     }
