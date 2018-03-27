@@ -321,6 +321,8 @@ var BarElements = {
         BarElements.content_bar.$title.text(title);
         BarElements.content_bar.$title.prop('title', title);
         BarElements.content_bar.$title.prop('href', href);
+
+        BarElements.maximize_bar.$comments.prop('title', title);
     },
     setSubredditData: function (subreddit) {
         BarElements.content_bar.$subreddit.closest('div').toggleClass('display_none', Bar.options.hide_subreddit);
