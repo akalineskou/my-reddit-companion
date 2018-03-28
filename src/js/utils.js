@@ -118,5 +118,8 @@ var Utils = {
     },
     checkPositionIsLeft: function (maximize_location_left, bar_maximized_direction) {
         return !bar_maximized_direction ? maximize_location_left : !maximize_location_left;
+    },
+    minutesToMs: function (minutes) {
+        return 1000 * 60 * minutes;
     }
 };

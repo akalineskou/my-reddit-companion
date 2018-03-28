@@ -23,12 +23,27 @@ myjQuery(document).ready(function () {
                         width: BarElements.getBarWidth()
                     });
                 }, 50);
+
+                var update_last_updated_interval = window.setInterval(function () {
+                    // try because the Bar object might be dead
+                    try {
+                        Utils.myConsoleLog('info', `Updating last_updated for slug '${Bar.data.slug}'`);
+
+                        Bar.actionPostMessage('content_bar_last_updated');
+                    } catch (e) {
+                        Utils.myConsoleLog('error', `Object might be dead, error: '${e.message}'`);
+
+                        // clear the inverval if so
+                        window.clearInterval(update_last_updated_interval);
+                    }
+                }, Bar.update_last_updated_delay);
             });
         }
     });
 });
 
 var Bar = {
+    update_last_updated_delay: Utils.minutesToMs(25),
     initData: function (data, logged_in) {
         Bar.data = data;
         Bar.logged_in = logged_in;

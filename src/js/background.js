@@ -2,11 +2,11 @@
 
 var Background = {
     app_name: 'my_reddit_companion',
-    logged_out_interval_delay: 1000 * 60 * 1, // when logged out check every 1 minute
-    logged_in_interval_delay: 1000 * 60 * 10, // when logged in check every 10 minutes
-    unread_messages_delay: 1000 * 60 * 2, // check every 2 minutes
-    garbage_collection_delay: 1000 * 60 * 5, // check every 5 minutes
-    garbage_collection_check: 1000 * 60 * 60, // delete when last_updated is more than 60 minutes
+    logged_out_interval_delay: Utils.minutesToMs(1), // when logged out check every 1 minute
+    logged_in_interval_delay: Utils.minutesToMs(10), // when logged in check every 10 minutes
+    unread_messages_delay: Utils.minutesToMs(2), // check every 2 minutes
+    garbage_collection_delay: Utils.minutesToMs(5), // check every 5 minutes
+    garbage_collection_check: Utils.minutesToMs(60), // delete when last_updated is more than 60 minutes
     init: function () {
         Background.initOptions();
         Background.resetUrlsData();
@@ -488,6 +488,10 @@ var BarTab = {
 
             case 'content_bar_maximized_direction':
                 url_data.bar_maximized_direction = !url_data.bar_maximized_direction;
+                break;
+
+            case 'content_bar_last_updated':
+                // do nothing extra
                 break;
         }
 
