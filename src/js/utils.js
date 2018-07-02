@@ -1,4 +1,4 @@
-/* global chrome, browser, Debug */
+/* global chrome, browser, Debug, myjQuery */
 
 var Utils = {
     postMessageToTopWindow: function (request) {
@@ -32,6 +32,11 @@ var Utils = {
         } else {
             Utils.getBrowserOrChromeVar().runtime.sendMessage(data, callback);
         }
+    },
+    myTabsSendMessage: function (tab_id, data) {
+        Utils.myConsoleLog('info', `Sending tab id ${tab_id} message with data`, data);
+
+        Utils.getBrowserOrChromeVar().tabs.sendMessage(tab_id, data);
     },
     myTabGet: function (tab_id, callback) {
         if (Utils.getBrowserOrChrome() === 'browser') {
@@ -121,5 +126,54 @@ var Utils = {
     },
     minutesToMs: function (minutes) {
         return 1000 * 60 * minutes;
+    },
+    app_name: 'my_reddit_companion',
+    redditRequest: function (path, action, data, method = 'POST', callback_success, callback_error) {
+        data.app = Utils.app_name;
+
+        Utils.myConsoleLog('info', `Sending '${path}' action '${action}' with data`, data);
+
+        myjQuery.ajax({
+            url: `${Utils.redditUrl()}/${path}/${action}`,
+            type: method,
+            dataType: 'json',
+            data: data,
+            success: function (response) {
+                Utils.myConsoleLog('info', `Received '${path}' response from action '${action}'`, response);
+
+                if (Utils.varIsFunction(callback_success)) {
+                    callback_success(response);
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                Utils.myConsoleLog('error', `Received '${path}' error from action '${action}'`, xhr, ajaxOptions, thrownError);
+
+                if (Utils.varIsFunction(callback_error)) {
+                    callback_error();
+                }
+            }
+        });
+    },
+    redditApiRequest: function (action, data, method = 'POST', callback_success, callback_error) {
+        Utils.redditRequest('api', action, data, method, callback_success, callback_error);
+    },
+    redditMessageRequest: function (action, data, method = 'POST', callback_success, callback_error) {
+        Utils.redditRequest('message', action, data, method, callback_success, callback_error);
+    },
+    getCookieValue: function (cookie_name) {
+        var getCookieValues = function (cookie) {
+            var cookieArray = cookie.split('=');
+            return cookieArray[1].trim();
+        };
+
+        var getCookieNames = function (cookie) {
+            var cookieArray = cookie.split('=');
+            return cookieArray[0].trim();
+        };
+
+        var cookies = document.cookie.split(';');
+        var cookieValue = cookies.map(getCookieValues)[cookies.map(getCookieNames).indexOf(cookie_name)];
+
+        return (cookieValue === undefined) ? '' : cookieValue;
     }
 };

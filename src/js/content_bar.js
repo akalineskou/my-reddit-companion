@@ -10,7 +10,7 @@ myjQuery(document).ready(function () {
         if (!Utils.varIsUndefined(response)) {
             Utils.myConsoleLog('info', "'background_content_bar_init' response", response);
 
-            Bar.initData(response.data, response.logged_in);
+            Bar.initData(response.data);
             Bar.initBar(function () {
                 Bar.initEvents();
 
@@ -44,9 +44,9 @@ myjQuery(document).ready(function () {
 
 var Bar = {
     update_last_updated_delay: Utils.minutesToMs(25),
-    initData: function (data, logged_in) {
+    initData: function (data) {
         Bar.data = data;
-        Bar.logged_in = logged_in;
+        Bar.logged_in = data.is_logged_in;
     },
     initEvents: function () {
         BarElements.content_bar.$upvote.click(function () {
