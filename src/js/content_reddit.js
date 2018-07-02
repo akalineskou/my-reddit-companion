@@ -1,4 +1,4 @@
-/* global Utils, myjQuery */
+/* global Utils, myjQuery, Options */
 
 var Reddit = {
     unread_messages_data: {},
@@ -234,9 +234,38 @@ var Reddit = {
                 delete Reddit.unread_messages_data[message_id];
             }
         }
+    },
+    optionsInit: function (options) {
+        Reddit.options = options;
+
+
+        var $multireddit_bar = myjQuery('.listing-chooser');
+        if ($multireddit_bar.length) {
+            if (Reddit.options.disable_multireddit_bar) {
+                $multireddit_bar.hide();
+            } else {
+                $multireddit_bar.show();
+            }
+        }
     }
 };
 
 myjQuery(document).ready(function () {
-    Reddit.init();
+    Options.getOptions(function (options) {
+        Reddit.optionsInit(options);
+
+        Reddit.init();
+    });
+
+    Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, sender, sendResponse) {
+        Utils.myConsoleLog('info', 'Incoming content_reddit request', request, 'sender', sender);
+
+        switch (request.action) {
+            case 'background_options_changed':
+                Options.getOptions(function (options) {
+                    Reddit.optionsInit(options);
+                });
+                break;
+        }
+    });
 });
