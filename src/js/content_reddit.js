@@ -14,7 +14,14 @@ var Reddit = {
     },
     init: function () {
         if (Utils.testRedditUrl(window.location)) {
+            // temporary check user is logged in with jquery because the request takes time
+            if (myjQuery('#header').find('span.user').length) {
+                Reddit.setLoggedInHash('temp');
+            }
+
             Utils.redditApiRequest('me.json', {}, 'GET', function (response) {
+                Reddit.setLoggedInHash('');
+
                 if (response && response.data && response.data.modhash && response.data.modhash !== '') {
                     Reddit.setLoggedInHash(response.data.modhash);
                     Reddit.user_name = response.data.name;
