@@ -1,3 +1,8 @@
+== Version 3.4.0 ==
+* Add support for firefox containers
+* Fix old reddit layout links redirecting to new reddit layout
+* Add option to hide multireddit vertical bar from homepage
+
 == Version 3.3.4 ==
 * Add interval to update last_updated time for opened bars (to not get closed by garbage collection)
 
