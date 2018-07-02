@@ -47,6 +47,7 @@ var Bar = {
     initData: function (data) {
         Bar.data = data;
         Bar.logged_in = data.is_logged_in;
+        Bar.reddit_url = data.reddit_url;
     },
     initEvents: function () {
         BarElements.content_bar.$upvote.click(function () {
@@ -106,7 +107,7 @@ var Bar = {
         });
     },
     setBarData: function () {
-        var permalink = `${Utils.redditUrl()}${Bar.data.permalink}`;
+        var permalink = Bar.data.permalink;
 
         BarElements.toggleBodyClasses();
         BarElements.toggleBarClasses();
@@ -114,12 +115,12 @@ var Bar = {
         BarElements.setLogoData();
         BarElements.setLogoLabelData();
         BarElements.setScoreData(Bar.data.score, Bar.data.likes, Bar.data.dislikes);
-        BarElements.setTitleData(Bar.data.title, permalink);
+        BarElements.setTitleData(Bar.data.title, `${Bar.reddit_url}${permalink}`);
         BarElements.setSubredditData(Bar.data.subreddit);
         BarElements.setLoginData();
         BarElements.setUpvoteData(Bar.data.likes);
         BarElements.setDownvoteData(Bar.data.dislikes);
-        BarElements.setCommentsData(Bar.data.num_comments, permalink);
+        BarElements.setCommentsData(Bar.data.num_comments, `${Bar.reddit_url}${permalink}`);
         BarElements.setSaveData(Bar.data.saved);
 
         BarElements.setSpamData();
@@ -312,7 +313,7 @@ var BarElements = {
     },
     setLogoData: function () {
         BarElements.content_bar.$logo.prop('title', 'Return to reddit');
-        BarElements.content_bar.$logo.prop('href', Utils.redditUrl());
+        BarElements.content_bar.$logo.prop('href', Bar.reddit_url);
 
         BarElements.content_bar.$logo.find('img').prop('alt', 'Reddit logo');
     },
@@ -321,7 +322,7 @@ var BarElements = {
 
         BarElements.content_bar.$logo_label.text('reddit');
         BarElements.content_bar.$logo_label.prop('title', 'Return to reddit');
-        BarElements.content_bar.$logo_label.prop('href', Utils.redditUrl());
+        BarElements.content_bar.$logo_label.prop('href', Bar.reddit_url);
     },
     setScoreData: function (score, likes, dislikes) {
         BarElements.content_bar.$score.closest('div').toggleClass('display_none', Bar.options.hide_score);
@@ -343,14 +344,14 @@ var BarElements = {
         BarElements.content_bar.$subreddit.closest('div').toggleClass('display_none', Bar.options.hide_subreddit);
 
         BarElements.content_bar.$subreddit.text(subreddit);
-        BarElements.content_bar.$subreddit.prop('href', `${Utils.redditUrl()}/${subreddit}`);
+        BarElements.content_bar.$subreddit.prop('href', `${Bar.reddit_url}/${subreddit}`);
         BarElements.content_bar.$subreddit.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setLoginData: function () {
         BarElements.content_bar.$login.closest('div').toggleClass('display_none', Bar.logged_in);
         BarElements.content_bar.$login.find('span').toggleClass('display_none', Bar.options.hide_labels);
 
-        BarElements.content_bar.$login.prop('href', `${Utils.redditUrl()}/login`);
+        BarElements.content_bar.$login.prop('href', `${Bar.reddit_url}/login`);
         BarElements.content_bar.$login.toggleClass('btn-sm', !Bar.options.big_buttons);
     },
     setUpvoteData: function (likes) {

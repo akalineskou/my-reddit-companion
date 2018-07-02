@@ -125,6 +125,7 @@ var Reddit = {
         var $entry = $thing.find('.entry');
 
         var data = {};
+        data.reddit_url = window.location.origin.replace(/\/$/, '');
         data.slug = $thing.data('fullname');
         data.title = $entry.find('a.title').text();
         data.likes = $entry.hasClass('likes') || null;
