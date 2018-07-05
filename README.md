@@ -26,6 +26,7 @@ The Opera Extension can be [found here](https://addons.opera.com/en/extensions/d
 [Screenshot](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/1-full.jpg)  
 [Screenshot responsive](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/2-responsive.jpg)  
 [Screenshot settings](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/3-settings.jpg)  
+[Screenshot minimized](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/4-minimized.jpg)  
   
 [Screenshot old](https://raw.githubusercontent.com/alex2005git/my-reddit-companion/master/screenshots/9-old.jpg)  
 
