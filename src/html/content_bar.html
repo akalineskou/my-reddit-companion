@@ -14,8 +14,9 @@
         <div id="content_bar">
             <div class="row align-items-center">
                 <div class="col-xs-auto">
-                    <a class="text-secondary content_logo">
-                        <img src="../images/reddit-48.png">
+                    <a class="content_logo">
+                        <i class="fab fa-reddit fa-2x align-middle reddit_logo"></i>
+                        <i class="fa fa-stop align-middle reddit_logo_helper"></i>
                     </a>
                 </div>
                 <div class="col-xs-auto d-none d-xl-inline">
@@ -50,17 +51,17 @@
                         <span class="d-none d-xl-inline">Downvote</span>
                     </button>
                 </div>
-                <div class="col-xs-auto d-none d-md-inline">
-                    <a class="btn btn-outline-info content_comments" title="Comments">
-                        <i class="fas fa-comments"></i>
-                        <span></span>
-                    </a>
-                </div>
                 <div class="col-xs-auto">
                     <button type="button" class="btn btn-outline-secondary content_save" title="Save">
                         <i class="fas fa-heart"></i>
                         <span class="d-none d-xl-inline">Save</span>
                     </button>
+                </div>
+                <div class="col-xs-auto d-none d-md-inline">
+                    <a class="btn btn-outline-info content_comments" title="Comments">
+                        <i class="fas fa-comments"></i>
+                        <span></span>
+                    </a>
                 </div>
 
                 <div class="col-xs-auto">
@@ -96,7 +97,13 @@
 
         <div id="maximize_bar" class="container display_none">
             <div class="row align-items-center">
-                <div class="col-xs-auto display_none">
+                <div class="col-xs-auto">
+                    <button type="button" class="btn btn-outline-secondary content_maximize" title="Maximize (right click to change direction)">
+                        <i class="fab fa-reddit-alien"></i>
+                    </button>
+                </div>
+
+                <div class="col-xs-auto">
                     <a class="btn btn-outline-secondary content_comments">
                         <i class="fas fa-comments"></i>
                         <span></span>
@@ -104,17 +111,27 @@
                 </div>
 
                 <div class="col-xs-auto">
-                    <button type="button" class="btn btn-outline-secondary content_maximize" title="Maximize (right click to change direction)">
-                        <i class="fab fa-reddit-alien"></i>
+                    <a class="btn btn-outline-secondary content_login" title="Login">
+                        <i class="fas fa-key"></i>
+                    </a>
+                </div>
+
+                <div class="col-xs-auto">
+                    <button type="button" class="btn btn-outline-secondary content_upvote" title="Upvote">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                </div>
+                <div class="col-xs-auto">
+                    <button type="button" class="btn btn-outline-secondary content_downvote" title="Downvote">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                </div>
+                <div class="col-xs-auto">
+                    <button type="button" class="btn btn-outline-secondary content_save" title="Save">
+                        <i class="fas fa-heart"></i>
                     </button>
                 </div>
 
-                <div class="col-xs-auto display_none">
-                    <a class="btn btn-outline-secondary content_comments">
-                        <i class="fas fa-comments"></i>
-                        <span></span>
-                    </a>
-                </div>
             </div>
         </div>
 

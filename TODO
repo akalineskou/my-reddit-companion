@@ -2,4 +2,4 @@ Features
 * 
 
 Bugs
-* 
+* open reddit bar when logged in, open the same reddit bar in context when not logged in, after refreshing the other has the other bar's data (urls_data is used by both)

@@ -1,3 +1,6 @@
+== Version 3.4.1 ==
+* Updated bar reddit logo + option to show upvote/downvote/save buttons when bar is minimized
+
 == Version 3.4.0 ==
 * Add support for firefox containers
 * Fix old reddit layout links redirecting to new reddit layout

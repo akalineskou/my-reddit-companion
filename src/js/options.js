@@ -11,6 +11,7 @@ var Options = {
         bar_location_bottom: false,
         maximize_location_left: false,
         hide_mod_icons: false,
+        show_maximize_action_icons: false,
         persist_bar: false,
         disable_unread_messages: false,
         disable_multireddit_bar: false,
@@ -23,7 +24,7 @@ var Options = {
         hide_save: false
     },
     deleteOptions: [
-        'fluid_container', 'dark_theme', 'transparent_background', 'disable_shadow', 'start_minimized', 'bar_location_bottom', 'maximize_location_left', 'hide_mod_icons', 'persist_bar', 'disable_unread_messages', 'disable_multireddit_bar'
+        'fluid_container', 'dark_theme', 'transparent_background', 'disable_shadow', 'start_minimized', 'bar_location_bottom', 'maximize_location_left', 'hide_mod_icons', 'show_maximize_action_icons', 'persist_bar', 'disable_unread_messages', 'disable_multireddit_bar'
     ],
     init: function () {
         Options.restoreOptions();
