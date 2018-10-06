@@ -440,7 +440,7 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                 break;
 
             case 'background_content_overlay_init':
-                Background.parentTabIsReddit(tab, function () {
+                var backgroundContentOverlayInit = function(tab) {
                     Background.setUrlTab(tab_id, tab.url);
 
                     var data = Background.getUrlData(tab.url);
@@ -449,7 +449,15 @@ Utils.getBrowserOrChromeVar().runtime.onMessage.addListener(function (request, s
                             slug: data.slug
                         });
                     }
-                });
+                }
+
+                if (!Background.options.enable_tabs_not_opened_by_user_interaction) {
+                    Background.parentTabIsReddit(tab, function () {
+                        backgroundContentOverlayInit(tab)
+                    });
+                } else {
+                    backgroundContentOverlayInit(tab)
+                }
 
                 $return = true;
                 break;

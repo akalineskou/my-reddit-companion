@@ -3,6 +3,7 @@
 var Reddit = {
     unread_messages_data: {},
     user_name: '',
+    continouslyAddRedditLinksInterval: 0,
     setLoggedInHash: function (logged_in_hash) {
         Reddit.logged_in_hash = logged_in_hash;
     },
@@ -72,23 +73,30 @@ var Reddit = {
             });
         }
     },
-    redditLinkClicked: function ($this) {
+    redditLinkClicked: function ($this, isThing = false) {
         var $target_element = myjQuery($this);
+        var $thing
 
-        // check element is a link
-        if (!Utils.elementIsAnchorTag($target_element)) {
-            Utils.myConsoleLog('info', 'Target element is not a link', $target_element);
+        if (!isThing) {
+            // check element is a link
+            if (!Utils.elementIsAnchorTag($target_element)) {
+                Utils.myConsoleLog('info', 'Target element is not a link', $target_element);
 
-            return;
+                return;
+            }
+
+            // fing parent with class thing
+            $thing = $target_element.closest('.thing');
+            if (!$thing.length) {
+                Utils.myConsoleLog('info', 'Unable to locate closest thing element from target element', $target_element);
+
+                return;
+            }
+        } else {
+            $thing = $this
         }
 
-        // fing parent with class thing
-        var $thing = $target_element.closest('.thing');
-        if (!$thing.length) {
-            Utils.myConsoleLog('info', 'Unable to locate closest thing element from target element', $target_element);
-
-            return;
-        }
+        $thing.addClass('myRedditCompanionAdded')
 
         Reddit.sendThingDataToBackground($thing);
     },
@@ -245,7 +253,6 @@ var Reddit = {
     optionsInit: function (options) {
         Reddit.options = options;
 
-
         var $multireddit_bar = myjQuery('.listing-chooser');
         if ($multireddit_bar.length) {
             if (Reddit.options.disable_multireddit_bar) {
@@ -253,6 +260,28 @@ var Reddit = {
             } else {
                 $multireddit_bar.show();
             }
+        }
+
+        Reddit.continouslyAddRedditLinks();
+    },
+    continouslyAddRedditLinks: function() {
+        if (Reddit.continouslyAddRedditLinksInterval > 0) {
+            window.clearInterval(Reddit.continouslyAddRedditLinksInterval)
+
+            Reddit.continouslyAddRedditLinksInterval = 0
+        }
+
+        if (Reddit.options.enable_tabs_not_opened_by_user_interaction) {
+            Reddit.continouslyAddRedditLinksInterval = window.setInterval(function() {
+                var $thing
+                myjQuery('.thing:not(.myRedditCompanionAdded)').each(function() {
+                    $thing = myjQuery(this)
+
+                    Utils.myConsoleLog('info', `Auto added '${$thing.find('a.title').text()}' to click links`);
+
+                    Reddit.redditLinkClicked($thing, true);
+                })
+            }, 1000 * 1)
         }
     }
 };
