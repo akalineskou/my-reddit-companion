@@ -3,7 +3,7 @@ myjQuery = jQuery.noConflict(true);
 
 var Debug = {
     console_logging: false,
-    StyleBytype: function (type) {
+    styleByType: function (type) {
         var style;
 
         switch (type) {

@@ -76,7 +76,7 @@ var Utils = {
     },
     myConsoleLog: function (type, ...arguments) {
         if (Debug.console_logging || type === 'debug') {
-            console.log(`%c${type.toUpperCase()}`, Debug.StyleBytype(type), ...arguments);
+            console.log(`%c${type.toUpperCase()}`, Debug.styleByType(type), ...arguments);
         }
     },
     elementIsAnchorTag: function ($element) {
